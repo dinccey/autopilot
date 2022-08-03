@@ -3,4 +3,7 @@
     <string name="app_name">Autopilot</string>
     <string name="menu_auto">auto</string>
     <string name="menu_manual">manual</string>
+    <string name="bearing">Bearing:</string>
+    <string name="target">Target:</string>
+    <string name="apply">Apply</string>
 </resources>

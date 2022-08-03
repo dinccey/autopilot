@@ -1,27 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.AutopilotFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <View
+        android:id="@+id/anchor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="false" />
+
+    <TextView
+        android:id="@+id/tv_gps_bearing_label"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/anchor"
+        android:gravity="left"
+        android:text="@string/bearing"
+        android:textSize="25sp" />
     <TextView
         android:id="@+id/tv_gps_bearing"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="GPS bearing"
+        android:text="0.0"
         android:gravity="top|center_horizontal"
-        android:textSize="35sp"
+
+        android:textSize="25sp"
         />
+
+    <TextView
+        android:id="@+id/tv_target_bearing_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/anchor"
+        android:layout_marginTop="54dp"
+        android:gravity="top|left"
+        android:text="@string/target"
+        android:textSize="25sp" />
+
+    <TextView
+        android:id="@+id/tv_sensitivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/anchor"
+        android:layout_marginTop="104dp"
+        android:gravity="left"
+        android:text="@string/sensitivity"
+        android:textSize="25sp" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/edit_target_bearing"
+        android:layout_width="148dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/anchor"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="54dp"
+        android:layout_toEndOf="@+id/tv_target_bearing_label"
+        android:inputType="number"
+        android:text="0"
+        android:textAlignment="center" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/edit_sensitivity"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/anchor"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="98dp"
+        android:layout_toEndOf="@+id/tv_target_bearing_label"
+        android:inputType="number"
+        android:text="0"
+        android:textAlignment="center" />
 
     <TextView
         android:id="@+id/tv_gps_accuracy"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="GPS accuracy"
         android:gravity="center"
-        android:textSize="35sp"
-        />
+        android:text="GPS accuracy"
+        android:textSize="35sp" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/button_apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/anchor"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="54dp"
+        android:layout_toEndOf="@+id/edit_target_bearing"
+        android:text="@string/apply" />
+
+    <Button
+        android:id="@+id/button_apply_sensitivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/anchor"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="104dp"
+        android:layout_toEndOf="@+id/edit_target_bearing"
+        android:text="@string/apply" />
+
+</RelativeLayout>

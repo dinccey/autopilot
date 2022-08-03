@@ -12,7 +12,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
@@ -25,7 +28,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.vaslim.autopilot.R;
 
 
-public class AutopilotFragment extends Fragment {
+public class AutopilotFragment extends Fragment{
 
     public static final int DEFAULT_UPDATE_INTERVAL = 100;
     public static final int FAST_UPDATE_INTERVAL = 50;
@@ -33,7 +36,12 @@ public class AutopilotFragment extends Fragment {
     LocationRequest locationRequest;
     LocationCallback locationCallback;
 
+    public static volatile double targetBearing = -1;
+    public static double currentBearing = -1;
+    public static int sensitivity = 1;
     TextView tvGPSBearing, tvGPSAccuracy;
+    EditText editTextTargetBearing;
+    Button buttonApply;
 
     public AutopilotFragment() {
         // Required empty public constructor
@@ -51,9 +59,14 @@ public class AutopilotFragment extends Fragment {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                updateViews(locationResult.getLastLocation());
+                if (isAdded() && isVisible()) {
+                    updateViews(locationResult.getLastLocation());
+                }
+                currentBearing = locationResult.getLastLocation().getBearing();
+
             }
         };
+
 
         updateGPS();
         locationUpdates();
@@ -81,8 +94,36 @@ public class AutopilotFragment extends Fragment {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_autopilot, container, false);
+        //register button listeners
+        buttonApply = view.findViewById(R.id.button_apply);
+        buttonApply.setOnClickListener(view1 -> updateTargetBearing());
+
+        Button buttonApplySensitivity = view.findViewById(R.id.button_apply_sensitivity);
+        buttonApplySensitivity.setOnClickListener(view1 -> updateSensitivity());
 
         return view;
+    }
+
+    private void updateSensitivity() {
+        EditText editTextSensitivity = AutopilotFragment.this.getActivity().findViewById(R.id.edit_sensitivity);
+        int value = Integer.parseInt(editTextSensitivity.getText().toString());
+        if(value>=1 && value<=10){
+            sensitivity = value;
+        }
+        else{
+            showToast("Value must be 1-10");
+        }
+    }
+
+    private void updateTargetBearing() {
+        editTextTargetBearing = AutopilotFragment.this.getActivity().findViewById(R.id.edit_target_bearing);
+        targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
+        if(targetBearing>=0 && targetBearing <=359){
+
+        }
+        else{
+            showToast("Target bearing must be 0-359");
+        }
     }
 
 
@@ -108,5 +149,10 @@ public class AutopilotFragment extends Fragment {
         //System.out.println("ACCURACY"+location.getAccuracy());
         tvGPSBearing.setText(String.valueOf(location.getBearing()));
         tvGPSAccuracy.setText(String.valueOf(location.getAccuracy()) + " "+location.getLatitude()+";"+location.getLongitude());
+    }
+
+
+    private void showToast(String message){
+        Toast.makeText(this.getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 }
