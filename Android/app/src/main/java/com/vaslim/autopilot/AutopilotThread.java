@@ -36,6 +36,8 @@ public class AutopilotThread extends Thread{
 
                 //number of rotations to send to arduino
                 int rotationCommandsCount = (int) ((turn.offsetDegrees/100*sensitivity) / CONTROLLER_ROTATION_LENGTH_TIME_SECONDS);
+                //cannot turn less than once
+                if(rotationCommandsCount<1) rotationCommandsCount = 1;
                 //send to arduino
                 sendToController(turn, rotationCommandsCount);
 
@@ -62,6 +64,7 @@ public class AutopilotThread extends Thread{
             e.printStackTrace();
             }
         }
+        if(rotationCommandsCount == 1) return;
         //return rudder to (almost) previous position
         for (int i = 0; i < rotationCommandsCount -1; i++) {
             //reverse direction
