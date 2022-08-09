@@ -10,6 +10,7 @@ public class AutopilotThread extends Thread{
     public volatile boolean running = true;
     public static final char CHAR_TURN_LEFT = 'L';
     public static final char CHAR_TURN_RIGHT = 'R';
+    public static final char CHAR_TURN_STOP = 'N';
     Ardutooth ardutooth;
 
 
@@ -34,51 +35,50 @@ public class AutopilotThread extends Thread{
                 Turn turn = calculateTurn(targetBearing,currentBearing);
                 System.out.println("TURN: "+turn.direction+", "+turn.offsetDegrees);
 
-                //number of rotations to send to arduino
-                int rotationCommandsCount = (int) ((turn.offsetDegrees/100*sensitivity) / CONTROLLER_ROTATION_LENGTH_TIME_SECONDS);
+                //number of turns to send to arduino
+                double rotationCommandsCount =  ((turn.offsetDegrees/100*sensitivity) / CONTROLLER_ROTATION_LENGTH_TIME_SECONDS);
+                int rotateAbstractTime=0;
                 //cannot turn less than once
-                if(rotationCommandsCount<1) rotationCommandsCount = 1;
+                if(rotationCommandsCount<1 && rotationCommandsCount>0.1) rotateAbstractTime = 1;
+                else if(rotationCommandsCount<=0.1) rotateAbstractTime = 0;
                 //send to arduino
-                sendToController(turn, rotationCommandsCount);
+                sendToController(turn,rotateAbstractTime);
+
+                System.out.println("isConnected: "+ardutooth.isConnected());
 
             }
         }
     }
 
     private void sendToController(Turn turn, int rotationCommandsCount) {
-        char turnTo = ' ';
+        char turnTo = 'N';
         //make the turn;
-        for (int i = 0; i < rotationCommandsCount; i++) {
-
-            if(turn.direction == Turn.Direction.RIGHT){
-                turnTo = CHAR_TURN_RIGHT;
-            }else{
-                turnTo = CHAR_TURN_LEFT;
-            }
-
-            ardutooth.sendChar(turnTo);
-            //sleep the amount of time it takes to complete one rotation cycle
-            try {
-            sleep((long) (CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000));
-             } catch (InterruptedException e) {
+        if(turn.direction == Turn.Direction.RIGHT){
+            turnTo = CHAR_TURN_RIGHT;
+        }else{
+            turnTo = CHAR_TURN_LEFT;
+        }
+        ardutooth.sendChar(turnTo);
+        try {
+            sleep((long) (CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*rotationCommandsCount));
+        } catch (InterruptedException e) {
             e.printStackTrace();
-            }
         }
-        if(rotationCommandsCount == 1) return;
+        if(rotationCommandsCount == 1) {
+            ardutooth.sendChar(CHAR_TURN_STOP);
+            return;
+        };
         //return rudder to (almost) previous position
-        for (int i = 0; i < rotationCommandsCount -1; i++) {
-            //reverse direction
-            if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT;
-            if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
+        if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT;
+        if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
 
-            ardutooth.sendChar(turnTo);
-            //sleep the amount of time it takes to complete one rotation cycle
-            try {
-                sleep((long) (CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        ardutooth.sendChar(turnTo);
+        try {
+            sleep((long) (CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1)));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        ardutooth.sendChar(CHAR_TURN_STOP);
 
     }
 

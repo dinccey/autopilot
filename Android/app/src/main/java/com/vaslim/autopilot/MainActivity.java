@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.menu_autopilot: {
-                        AutopilotFragment.targetBearing = -1;
                         if(ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,autopilotFragment).commit();
                         }else{
