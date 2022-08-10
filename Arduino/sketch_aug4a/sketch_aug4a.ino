@@ -20,28 +20,30 @@ void loop() {  // run over and over
     Serial.println(inputByte);
     if (inputByte == 'L') {
       leftTurn();
-      digitalWrite(LED_BUILTIN, HIGH);
     } else if (inputByte == 'R') {
       rightTurn();
-      digitalWrite(LED_BUILTIN, HIGH);
     }else if(inputByte == 'N'){
       stopTurn();
-      digitalWrite(LED_BUILTIN, LOW);
     }
+    //mySerial.flush();
     delay(100);
   }
+  stopTurn();
 }
 
 void leftTurn(){  
   digitalWrite(RIGHT,LOW);  
   digitalWrite(LEFT,HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void rightTurn(){
   digitalWrite(LEFT,LOW);
   digitalWrite(RIGHT,HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 void stopTurn(){
   digitalWrite(LEFT,LOW);
   digitalWrite(RIGHT,LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 }
