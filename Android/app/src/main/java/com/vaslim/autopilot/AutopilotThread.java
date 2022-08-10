@@ -59,11 +59,7 @@ public class AutopilotThread extends Thread{
             turnTo = CHAR_TURN_LEFT;
         }
         ardutooth.sendChar(turnTo);
-        try {
-            sleep((long) (CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*rotationCommandsCount));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*rotationCommandsCount);
         if(rotationCommandsCount == 1) {
             ardutooth.sendChar(CHAR_TURN_STOP);
             return;
@@ -73,13 +69,18 @@ public class AutopilotThread extends Thread{
         if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
 
         ardutooth.sendChar(turnTo);
+        turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1));
+
+        ardutooth.sendChar(CHAR_TURN_STOP);
+
+    }
+
+    private void turnFor(double value) {
         try {
-            sleep((long) (CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1)));
+            sleep((long) value);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        ardutooth.sendChar(CHAR_TURN_STOP);
-
     }
 
     private Turn calculateTurn(double destination, double origin){
