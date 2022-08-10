@@ -67,7 +67,7 @@ public class AutopilotThread extends Thread{
         };
         //return rudder to (almost) previous position
         if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT;
-        if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
+        else if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
 
         ardutooth.sendChar(turnTo);
         turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1));
