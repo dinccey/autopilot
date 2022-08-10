@@ -51,6 +51,7 @@ public class AutopilotThread extends Thread{
     }
 
     private void sendToController(Turn turn, int rotationCommandsCount) {
+        if (rotationCommandsCount == 0) return;
         char turnTo = 'N';
         //make the turn;
         if(turn.direction == Turn.Direction.RIGHT){
