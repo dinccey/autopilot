@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNavigationView;
 
-    Ardutooth ardutooth;
+    public static Ardutooth ardutooth;
     AutopilotFragment autopilotFragment = new AutopilotFragment();
     ManualFragment manualFragment = new ManualFragment();
     SettingsFragment settingsFragment = new SettingsFragment();
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         ardutooth.setConnection();
 
         //start autopilot thread
-        AutopilotThread autopilotThread = new AutopilotThread(ardutooth);
+        AutopilotThread autopilotThread = new AutopilotThread();
         autopilotThread.start();
 
 

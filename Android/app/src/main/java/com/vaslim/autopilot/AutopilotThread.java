@@ -11,11 +11,10 @@ public class AutopilotThread extends Thread{
     public static final char CHAR_TURN_LEFT = 'L';
     public static final char CHAR_TURN_RIGHT = 'R';
     public static final char CHAR_TURN_STOP = 'N';
-    Ardutooth ardutooth;
 
 
-    public AutopilotThread(Ardutooth ardutooth) {
-        this.ardutooth = ardutooth;
+    public AutopilotThread() {
+
     }
 
     public void run(){
@@ -37,14 +36,16 @@ public class AutopilotThread extends Thread{
 
                 //number of turns to send to arduino
                 double rotationCommandsCount =  ((turn.offsetDegrees/100*sensitivity) / CONTROLLER_ROTATION_LENGTH_TIME_SECONDS);
-                int rotateAbstractTime=0;
+                int rotateAbstractTime= (int) rotationCommandsCount;
                 //cannot turn less than once
+                System.out.println("ROTATION COUNT "+rotationCommandsCount);
                 if(rotationCommandsCount<1 && rotationCommandsCount>0.1) rotateAbstractTime = 1;
                 else if(rotationCommandsCount<=0.1) rotateAbstractTime = 0;
                 //send to arduino
+                System.out.println("ROTATE "+rotateAbstractTime);
                 sendToController(turn,rotateAbstractTime);
 
-                System.out.println("isConnected: "+ardutooth.isConnected());
+                //System.out.println("isConnected: "+MainActivity.ardutooth.isConnected());
 
             }
         }
@@ -59,24 +60,25 @@ public class AutopilotThread extends Thread{
         }else{
             turnTo = CHAR_TURN_LEFT;
         }
-        ardutooth.sendChar(turnTo);
+        MainActivity.ardutooth.sendChar(turnTo);
         turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*rotationCommandsCount);
         if(rotationCommandsCount == 1) {
-            ardutooth.sendChar(CHAR_TURN_STOP);
+            MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
             return;
         };
         //return rudder to (almost) previous position
         if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT;
         else if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
 
-        ardutooth.sendChar(turnTo);
+        MainActivity.ardutooth.sendChar(turnTo);
         turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1));
 
-        ardutooth.sendChar(CHAR_TURN_STOP);
+        MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
 
     }
 
     private void turnFor(double value) {
+        System.out.println("SLEEP: "+value+" ms");
         try {
             sleep((long) value);
         } catch (InterruptedException e) {
