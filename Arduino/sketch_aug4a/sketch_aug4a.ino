@@ -2,8 +2,8 @@
 
 SoftwareSerial mySerial(10, 11);  // RX, TX
 char inputByte = 'z';
-uint8_t LEFT = 5;
-uint8_t RIGHT = 6;
+uint8_t LEFT = 6;
+uint8_t RIGHT = 5;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  // There's a LED that turn on if there are input data
@@ -28,7 +28,7 @@ void loop() {  // run over and over
     //mySerial.flush();
     delay(100);
   }
-  stopTurn();
+  //stopTurn();
 }
 
 void leftTurn(){  
