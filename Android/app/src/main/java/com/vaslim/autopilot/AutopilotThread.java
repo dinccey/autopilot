@@ -2,18 +2,18 @@ package com.vaslim.autopilot;
 
 import com.vaslim.autopilot.fragments.AutopilotFragment;
 
-import io.github.giuseppebrb.ardutooth.Ardutooth;
-
 public class AutopilotThread extends Thread{
 
     public static final double CONTROLLER_ROTATION_LENGTH_TIME_SECONDS = 0.5;
+    private static final double PAUSE_BEFORE_SPIN = 100;
+    private static final double CYCLE_SLEEP = 3000;
     public volatile boolean running = true;
     public static final char CHAR_TURN_LEFT = 'L';
     public static final char CHAR_TURN_RIGHT = 'R';
     public static final char CHAR_TURN_STOP = 'N';
 
-
     public AutopilotThread() {
+
 
     }
 
@@ -44,7 +44,7 @@ public class AutopilotThread extends Thread{
                 //send to arduino
                 System.out.println("ROTATE "+rotateAbstractTime);
                 sendToController(turn,rotateAbstractTime);
-
+                sleepMilliseconds(CYCLE_SLEEP);
                 //System.out.println("isConnected: "+MainActivity.ardutooth.isConnected());
 
             }
@@ -61,23 +61,28 @@ public class AutopilotThread extends Thread{
             turnTo = CHAR_TURN_LEFT;
         }
         MainActivity.ardutooth.sendChar(turnTo);
-        turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*rotationCommandsCount);
+        double sleepTime = CONTROLLER_ROTATION_LENGTH_TIME_SECONDS * 1000 * rotationCommandsCount;
+        System.out.println("SLEEP TIME: "+sleepTime/1000 + "s");
+        sleepMilliseconds(sleepTime);
         if(rotationCommandsCount == 1) {
             MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
+            sleepMilliseconds(PAUSE_BEFORE_SPIN);
             return;
         };
         //return rudder to (almost) previous position
+        sleepMilliseconds(PAUSE_BEFORE_SPIN);
         if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT;
         else if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
 
         MainActivity.ardutooth.sendChar(turnTo);
-        turnFor(CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1));
+        sleepTime = CONTROLLER_ROTATION_LENGTH_TIME_SECONDS*1000*(rotationCommandsCount-1);
+        sleepMilliseconds(sleepTime);
 
         MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
-
+        sleepMilliseconds(PAUSE_BEFORE_SPIN);
     }
 
-    private void turnFor(double value) {
+    private void sleepMilliseconds(double value) {
         System.out.println("SLEEP: "+value+" ms");
         try {
             sleep((long) value);
