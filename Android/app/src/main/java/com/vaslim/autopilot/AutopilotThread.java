@@ -40,7 +40,7 @@ public class AutopilotThread extends Thread{
                 //cannot turn less than once
                 System.out.println("ROTATION COUNT "+rotationCommandsCount);
                 if(rotationCommandsCount<1 && rotationCommandsCount>0.1) rotateAbstractTime = 1;
-                else if(rotationCommandsCount<=0.1) rotateAbstractTime = 0;
+                else if(turn.offsetDegrees < 0.7) rotateAbstractTime = 0;
                 //send to arduino
                 System.out.println("ROTATE "+rotateAbstractTime);
                 sendToController(turn,rotateAbstractTime);
