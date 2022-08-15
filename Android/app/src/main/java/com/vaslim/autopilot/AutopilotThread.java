@@ -7,6 +7,8 @@ public class AutopilotThread extends Thread{
     public static final double NORMALIZER = 30;
     private static final double PAUSE_BEFORE_SPIN = 100;
     private static final double CYCLE_SLEEP = 3000;
+    private static final double THRESHOLD_DEVIATION = 0.7;
+    private static final double LENGTH_OF_TURN_THRESHOLD = 0.5;
     public volatile boolean running = true;
     public static final char CHAR_TURN_LEFT = 'L';
     public static final char CHAR_TURN_RIGHT = 'R';
@@ -35,7 +37,9 @@ public class AutopilotThread extends Thread{
                 System.out.println("TURN: "+turn.direction+", "+turn.offsetDegrees);
 
                 double lengthOfTurn = ((turn.offsetDegrees * sensitivity) / NORMALIZER)*1000;
-                sendToController(turn,lengthOfTurn);
+                if(turn.offsetDegrees<THRESHOLD_DEVIATION){
+                    sendToController(turn,lengthOfTurn);
+                }
 
                 sleepMilliseconds(CYCLE_SLEEP);
 
@@ -56,6 +60,9 @@ public class AutopilotThread extends Thread{
         MainActivity.ardutooth.sendChar(turnTo);
         sleepMilliseconds(lengthOfTurn);
         MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
+        if(lengthOfTurn<LENGTH_OF_TURN_THRESHOLD){
+            return;
+        }
         //return rudder to (almost) previous position
 
         if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT; //TODO put this in Turn class
