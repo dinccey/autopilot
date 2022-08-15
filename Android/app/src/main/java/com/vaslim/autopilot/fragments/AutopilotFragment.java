@@ -38,7 +38,7 @@ public class AutopilotFragment extends Fragment{
 
     public static volatile double targetBearing = -1;
     public static double currentBearing = -1;
-    public static int sensitivity = 1;
+    public static int sensitivity = 5;
     TextView tvGPSBearing, tvGPSAccuracy;
     EditText editTextTargetBearing;
     Button buttonApply;
