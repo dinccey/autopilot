@@ -7,7 +7,7 @@ public class AutopilotThread extends Thread{
     public static final double NORMALIZER = 30;
     private static final double PAUSE_BEFORE_SPIN = 100;
     private static final double CYCLE_SLEEP = 3000;
-    private static final double THRESHOLD_DEVIATION = 0.7;
+    private static final double DEVIATION_THRESHOLD = 0.7;
     private static final double LENGTH_OF_TURN_THRESHOLD = 0.5;
     public volatile boolean running = true;
     public static final char CHAR_TURN_LEFT = 'L';
@@ -37,7 +37,7 @@ public class AutopilotThread extends Thread{
                 System.out.println("TURN: "+turn.direction+", "+turn.offsetDegrees);
 
                 double lengthOfTurn = ((turn.offsetDegrees * sensitivity) / NORMALIZER)*1000;
-                if(turn.offsetDegrees<THRESHOLD_DEVIATION){
+                if(turn.offsetDegrees< DEVIATION_THRESHOLD){
                     sendToController(turn,lengthOfTurn);
                 }
 
