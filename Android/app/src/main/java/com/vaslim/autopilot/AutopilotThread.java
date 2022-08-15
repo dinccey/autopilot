@@ -34,7 +34,7 @@ public class AutopilotThread extends Thread{
                 Turn turn = calculateTurn(targetBearing,currentBearing);
                 System.out.println("TURN: "+turn.direction+", "+turn.offsetDegrees);
 
-                double lengthOfTurn = (turn.offsetDegrees * sensitivity) / NORMALIZER;
+                double lengthOfTurn = ((turn.offsetDegrees * sensitivity) / NORMALIZER)*1000;
                 sendToController(turn,lengthOfTurn);
 
                 sleepMilliseconds(CYCLE_SLEEP);
