@@ -44,7 +44,7 @@ public class AutopilotThread extends Thread{
 
                 rudderControl(sensitivity, maxLengthOfTurn);
 
-                sleepMilliseconds(CYCLE_SLEEP);
+                sleepMilliseconds(CYCLE_SLEEP); //bearing updates are not super fast
 
             }
         }
