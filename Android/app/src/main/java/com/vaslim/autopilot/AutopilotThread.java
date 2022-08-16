@@ -38,7 +38,7 @@ public class AutopilotThread extends Thread{
                 System.out.println("TURN: "+turn.direction+", "+turn.offsetDegrees);
 
                 double lengthOfTurn = ((turn.offsetDegrees * sensitivity) / NORMALIZER)*1000;
-                if(turn.offsetDegrees< DEVIATION_THRESHOLD){
+                if(turn.offsetDegrees > DEVIATION_THRESHOLD){
                     sendToController(turn,lengthOfTurn);
                 }
 
