@@ -111,6 +111,7 @@ public class AutopilotThread extends Thread{
     private void doSmallCorrection() {
         sendToController(turn.getTurnChar());
         sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+        sendToController(turn.getStopChar());
         if(turn.getTurnChar() == Turn.CHAR_TURN_LEFT){
             smallTurnMiliseconds-=SMALL_CORRECTION_MILISECONDS;
         }
