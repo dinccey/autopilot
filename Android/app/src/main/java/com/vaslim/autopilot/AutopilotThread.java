@@ -4,19 +4,19 @@ import com.vaslim.autopilot.fragments.AutopilotFragment;
 
 public class AutopilotThread extends Thread{
 
-    public static final double NORMALIZER = 30;
-    private static final double PAUSE_BEFORE_SPIN = 100;
-    private static final double CYCLE_SLEEP = 3000;
+    public static final double NORMALIZER = 1300;
+    private static final double CYCLE_SLEEP = 100;
     private static final double DEVIATION_THRESHOLD = 0.7;
-    private static final double MIN_LENGTH_OF_TURN_THRESHOLD = 500; //0.5s
-    private static final double MAX_LENGTH_OF_TURN_THRESHOLD = 7000; //7s
+
+    private static Turn turn;
+    private Turn committedTurn = null;
+    private long turnStartTime;
+    private long timeDifference = -1;
     public volatile boolean running = true;
-    public static final char CHAR_TURN_LEFT = 'L';
-    public static final char CHAR_TURN_RIGHT = 'R';
-    public static final char CHAR_TURN_STOP = 'N';
+
 
     public AutopilotThread() {
-
+        turn = new Turn();
 
     }
 
@@ -34,13 +34,11 @@ public class AutopilotThread extends Thread{
                 targetBearing = AutopilotFragment.targetBearing;
                 currentBearing = AutopilotFragment.currentBearing;
                 sensitivity = AutopilotFragment.sensitivity;
-                Turn turn = calculateTurn(targetBearing,currentBearing);
-                System.out.println("TURN: "+turn.direction+", "+turn.offsetDegrees);
+                long maxLengthOfTurn = (long) (sensitivity *NORMALIZER);
+                calculateTurn(targetBearing,currentBearing);
+                System.out.println("BEARING: "+currentBearing);
 
-                double lengthOfTurn = ((turn.offsetDegrees * sensitivity) / NORMALIZER)*1000;
-                if(turn.offsetDegrees > DEVIATION_THRESHOLD){
-                    sendToController(turn,lengthOfTurn);
-                }
+                rudderControl(sensitivity, maxLengthOfTurn);
 
                 sleepMilliseconds(CYCLE_SLEEP);
 
@@ -48,33 +46,45 @@ public class AutopilotThread extends Thread{
         }
     }
 
-    private void sendToController(Turn turn, double lengthOfTurn) {
-        if(lengthOfTurn>MAX_LENGTH_OF_TURN_THRESHOLD) lengthOfTurn = MAX_LENGTH_OF_TURN_THRESHOLD;
-        //if(lengthOfTurn<MIN_LENGTH_OF_TURN_THRESHOLD) lengthOfTurn = MIN_LENGTH_OF_TURN_THRESHOLD;
-        char turnTo;
-        //make the turn;
-        if(turn.direction == Turn.Direction.RIGHT){
-            turnTo = CHAR_TURN_RIGHT;
-        }else{
-            turnTo = CHAR_TURN_LEFT;
+    private void rudderControl(int sensitivity, long maxLengthOfTurn) {
+        //IF NOT CORRECTING AND NEEDS CORrECTiNG
+        if(committedTurn ==  null  && turn.offsetDegrees > DEVIATION_THRESHOLD){
+            committedTurn = new Turn(turn.direction,turn.offsetDegrees);
+            sendToController(committedTurn.getTurnChar());
+            turnStartTime = System.currentTimeMillis();
+            timeDifference = 0;
+            System.out.println("------"+committedTurn.getTurnChar()+"------");
         }
-        System.out.println("SLEEP TIME: "+lengthOfTurn/1000 + "s");
-
-        MainActivity.ardutooth.sendChar(turnTo);
-        sleepMilliseconds(lengthOfTurn);
-        MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
-        if(lengthOfTurn< MIN_LENGTH_OF_TURN_THRESHOLD){
-            return;
+        //IF CORRECTING AND SHOULD START RETURNING RUDDER TO NEUTRAL
+        else if(committedTurn != null && turn.offsetDegrees < sensitivity){
+            long currentTime = System.currentTimeMillis();
+            timeDifference = currentTime - turnStartTime;
+            timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
+            sendToController(committedTurn.getReverseChar());
+            System.out.println("RETURN------"+committedTurn.getReverseChar()+"------");
+            turnStartTime = System.currentTimeMillis();
+            committedTurn = null;
         }
-        //return rudder to (almost) previous position
+        //IF RETURNING RUDDER TO NEUTRAL IS COMPLETE
+        if((committedTurn == null && turnStartTime + timeDifference >= System.currentTimeMillis())){
+            sendToController(turn.getStopChar());
+            System.out.println("END--------------");
+        }
+        //IF CORRECTING AND EXCEEDED MAX RUDDER TURN
+        if(committedTurn != null && (System.currentTimeMillis() - turnStartTime) >= maxLengthOfTurn){
+            timeDifference = maxLengthOfTurn;
+            timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
+            sendToController(turn.getStopChar());
+            System.out.println("CORRECTING------MAX TURN------");
+        }
+    }
 
-        if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT; //TODO put this in Turn class
-        else if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
-        MainActivity.ardutooth.sendChar(turnTo);
-        sleepMilliseconds(lengthOfTurn-(lengthOfTurn*0.1));
+    private void sendToController(char command) {
+       MainActivity.ardutooth.sendChar(command);
+    }
 
-        MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
-        //sleepMilliseconds(PAUSE_BEFORE_SPIN);
+    private long reverseTimeCalculate(long time, int sensitivity){
+        return time -(time*(sensitivity/10));
     }
 
     private void sleepMilliseconds(double value) {
@@ -86,7 +96,7 @@ public class AutopilotThread extends Thread{
         }
     }
 
-    private Turn calculateTurn(double destination, double origin){
+    private void calculateTurn(double destination, double origin){
         double LH = origin - destination;
         if(LH<0) LH+=360;
         double RH = destination - origin;
@@ -101,8 +111,7 @@ public class AutopilotThread extends Thread{
             direction = Turn.Direction.RIGHT;
             offsetDegrees = RH;
         }
-
-        Turn turn = new Turn(direction,offsetDegrees);
-        return turn;
+        turn.direction = direction;
+        turn.offsetDegrees = offsetDegrees;
     }
 }
