@@ -53,7 +53,8 @@ public class AutopilotThread extends Thread{
     private void rudderControl(int sensitivity, long maxLengthOfTurn) {
         //SMALL CORRECTION UNLESS MAX SMALL TURNS EXCEEDED (negative for LEFT, positive for RIGHT)
         if(committedTurn ==  null  && turn.offsetDegrees < sensitivity &&
-                !(smallTurnMiliseconds >= MAX_SMALL_TURN_TOTAL || smallTurnMiliseconds <= MAX_SMALL_TURN_TOTAL*-1)){
+                ((turn.direction == Turn.Direction.RIGHT && smallTurnMiliseconds < MAX_SMALL_TURN_TOTAL)||
+                        (turn.direction == Turn.Direction.LEFT && smallTurnMiliseconds > (MAX_SMALL_TURN_TOTAL*-1)))){
             doSmallCorrection();
         }
         //IF NOT CORRECTING AND NEEDS CORrECTiNG
