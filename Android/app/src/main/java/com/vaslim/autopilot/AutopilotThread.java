@@ -119,6 +119,7 @@ public class AutopilotThread extends Thread{
         else if(turn.getTurnChar() == Turn.CHAR_TURN_RIGHT){
             smallTurnMiliseconds+=SMALL_CORRECTION_MILISECONDS;
         }
+        sleepMilliseconds(NORMALIZER); //sleep a little bit before reviewing changes
     }
 
     private void sendToController(char command) {
