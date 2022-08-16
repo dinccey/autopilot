@@ -70,7 +70,6 @@ public class AutopilotThread extends Thread{
 
         if(turnTo == CHAR_TURN_LEFT) turnTo = CHAR_TURN_RIGHT; //TODO put this in Turn class
         else if(turnTo == CHAR_TURN_RIGHT) turnTo = CHAR_TURN_LEFT;
-        sleepMilliseconds(lengthOfTurn);
         MainActivity.ardutooth.sendChar(turnTo);
         sleepMilliseconds(lengthOfTurn-(lengthOfTurn*0.1));
 
