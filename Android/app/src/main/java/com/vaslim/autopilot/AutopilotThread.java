@@ -58,11 +58,11 @@ public class AutopilotThread extends Thread{
             doSmallCorrection();
         }
         //IF NOT CORRECTING AND NEEDS CORrECTiNG
-        else if(committedTurn ==  null  && turn.offsetDegrees >= sensitivity){
+        else if(committedTurn ==  null  && turn.offsetDegrees > sensitivity){
             doBiggerCorrection();
         }
         //IF CORRECTING AND SHOULD START RETURNING RUDDER TO NEUTRAL
-        else if(committedTurn != null && !returningRudder && turn.offsetDegrees <= sensitivity){
+        else if(committedTurn != null && !returningRudder && turn.offsetDegrees < sensitivity){
         //else if(committedTurn != null && !returningRudder && turn.offsetDegrees < sensitivity && committedTurn.direction == turn.direction){
             doReturnRudderFromBiggerCorrection(sensitivity);
         }
