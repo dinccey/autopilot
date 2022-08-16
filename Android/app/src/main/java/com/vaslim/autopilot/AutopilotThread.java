@@ -75,7 +75,7 @@ public class AutopilotThread extends Thread{
         sleepMilliseconds(lengthOfTurn-(lengthOfTurn*0.1));
 
         MainActivity.ardutooth.sendChar(CHAR_TURN_STOP);
-        sleepMilliseconds(PAUSE_BEFORE_SPIN);
+        //sleepMilliseconds(PAUSE_BEFORE_SPIN);
     }
 
     private void sleepMilliseconds(double value) {
