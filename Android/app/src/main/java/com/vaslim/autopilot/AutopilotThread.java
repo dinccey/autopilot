@@ -71,7 +71,7 @@ public class AutopilotThread extends Thread{
             doEndReturnRudder();
         }
         //IF CORRECTING AND EXCEEDED MAX RUDDER TURN
-        if(committedTurn != null && (System.currentTimeMillis() - turnStartTime) >= maxLengthOfTurn){
+        if(committedTurn != null && !returningRudder && (System.currentTimeMillis() - turnStartTime) >= maxLengthOfTurn){
             doExceededMaxTurningTime(sensitivity, maxLengthOfTurn);
         }
     }
@@ -79,7 +79,7 @@ public class AutopilotThread extends Thread{
     private void doExceededMaxTurningTime(int sensitivity, long maxLengthOfTurn) {
         timeDifference = maxLengthOfTurn;
         timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
-        sendToController(turn.getStopChar());
+        //sendToController(turn.getStopChar());
         System.out.println("CORRECTING------MAX TURN------");
     }
 
