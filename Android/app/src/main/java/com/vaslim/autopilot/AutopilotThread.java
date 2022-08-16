@@ -9,7 +9,7 @@ public class AutopilotThread extends Thread{
     private static final double CYCLE_SLEEP = 3000;
     private static final double DEVIATION_THRESHOLD = 0.7;
     private static final double MIN_LENGTH_OF_TURN_THRESHOLD = 500; //0.5s
-    private static final double MAX_LENGTH_OF_TURN_THRESHOLD = 10000; //10s
+    private static final double MAX_LENGTH_OF_TURN_THRESHOLD = 7000; //7s
     public volatile boolean running = true;
     public static final char CHAR_TURN_LEFT = 'L';
     public static final char CHAR_TURN_RIGHT = 'R';
@@ -50,6 +50,7 @@ public class AutopilotThread extends Thread{
 
     private void sendToController(Turn turn, double lengthOfTurn) {
         if(lengthOfTurn>MAX_LENGTH_OF_TURN_THRESHOLD) lengthOfTurn = MAX_LENGTH_OF_TURN_THRESHOLD;
+        //if(lengthOfTurn<MIN_LENGTH_OF_TURN_THRESHOLD) lengthOfTurn = MIN_LENGTH_OF_TURN_THRESHOLD;
         char turnTo;
         //make the turn;
         if(turn.direction == Turn.Direction.RIGHT){
