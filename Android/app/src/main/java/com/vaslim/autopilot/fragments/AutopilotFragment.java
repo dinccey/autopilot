@@ -26,6 +26,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.vaslim.autopilot.R;
+import com.vaslim.autopilot.SharedData;
 
 
 public class AutopilotFragment extends Fragment{
@@ -36,9 +37,9 @@ public class AutopilotFragment extends Fragment{
     LocationRequest locationRequest;
     LocationCallback locationCallback;
 
-    public static volatile double targetBearing = -1;
-    public static double currentBearing = -1;
-    public static int sensitivity = 3;
+    //public static volatile double targetBearing = -1;
+    //public static double currentBearing = -1;
+    //public static int sensitivity = 3;
     TextView tvGPSBearing, tvGPSAccuracy;
     EditText editTextTargetBearing;
     Button buttonApply;
@@ -62,7 +63,7 @@ public class AutopilotFragment extends Fragment{
                 if (isAdded() && isVisible()) {
                     updateViews(locationResult.getLastLocation());
                 }
-                currentBearing = locationResult.getLastLocation().getBearing();
+                SharedData.currentBearing = locationResult.getLastLocation().getBearing();
 
             }
         };
@@ -108,7 +109,7 @@ public class AutopilotFragment extends Fragment{
         EditText editTextSensitivity = AutopilotFragment.this.getActivity().findViewById(R.id.edit_sensitivity);
         int value = Integer.parseInt(editTextSensitivity.getText().toString());
         if(value>=1 && value<=10){
-            sensitivity = value;
+            SharedData.sensitivity = value;
         }
         else{
             showToast("Value must be 1-10");
@@ -117,8 +118,8 @@ public class AutopilotFragment extends Fragment{
 
     private void updateTargetBearing() {
         editTextTargetBearing = AutopilotFragment.this.getActivity().findViewById(R.id.edit_target_bearing);
-        targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
-        if(targetBearing>=0 && targetBearing <=359){
+        SharedData.targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
+        if(SharedData.targetBearing>=0 && SharedData.targetBearing <=359){
 
         }
         else{

@@ -61,12 +61,12 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                     case R.id.menu_manual: {
-                        AutopilotFragment.targetBearing = -1;
+                        SharedData.targetBearing = -1;
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,manualFragment).commit();
                         return true;
                     }
                     case R.id.menu_settings: {
-                        AutopilotFragment.targetBearing = -1;
+                        SharedData.targetBearing = -1;
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,settingsFragment).commit();
                         return true;
                     }

@@ -34,10 +34,10 @@ public class AutopilotThread extends Thread{
         int sensitivity = 1;
 
         while(running){
-            if(AutopilotFragment.targetBearing >= 0 && AutopilotFragment.sensitivity >= 1 && AutopilotFragment.sensitivity <=10){
-                targetBearing = AutopilotFragment.targetBearing;
-                currentBearing = AutopilotFragment.currentBearing;
-                sensitivity = AutopilotFragment.sensitivity;
+            if(SharedData.targetBearing >= 0 && SharedData.sensitivity >= 1 && SharedData.sensitivity <=10){
+                targetBearing = SharedData.targetBearing;
+                currentBearing = SharedData.currentBearing;
+                sensitivity = SharedData.sensitivity;
                 long maxLengthOfTurn = (long) (sensitivity *NORMALIZER);
                 calculateTurn(targetBearing,currentBearing);
                 System.out.println("BEARING: "+currentBearing);
