@@ -93,12 +93,12 @@ public class AutopilotThread extends Thread{
 
     private void doReturnRudderFromBiggerCorrection(int sensitivity) {
         long currentTime = System.currentTimeMillis();
-        if(timeDifference == 0){
+        if(timeDifference == 0){ //if not exceeded max turning time
             timeDifference = currentTime - turnStartTime;
             timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
         }
-        sendToController(committedTurn.getReverseChar());
-        turnStartTime = System.currentTimeMillis();
+        sendToController(committedTurn.getReverseChar()); //reverse turning direction
+        turnStartTime = System.currentTimeMillis(); //get time when started turning
         returningRudder = true; //started returning rudder
         System.out.println("RETURN------"+committedTurn.getReverseChar()+"------");
     }
