@@ -6,4 +6,5 @@
     <string name="bearing">Bearing:</string>
     <string name="target">Target:</string>
     <string name="apply">Apply</string>
+    <string name="compass">compass</string>
 </resources>

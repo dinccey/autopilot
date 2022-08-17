@@ -3,6 +3,9 @@
     <item android:id="@+id/menu_autopilot"
         android:title="@string/menu_auto"
         android:icon="@drawable/ic_baseline_gps_fixed_24" />
+    <item android:id="@+id/menu_compass"
+        android:title="@string/compass"
+        android:icon="@drawable/ic_baseline_compass_calibration_24"/>
     <item android:id="@+id/menu_manual"
         android:title="@string/menu_manual"
         android:icon="@drawable/ic_baseline_settings_remote_24"/>

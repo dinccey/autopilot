@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.vaslim.autopilot.fragments.AutopilotFragment;
+import com.vaslim.autopilot.fragments.CompassFragment;
 import com.vaslim.autopilot.fragments.ManualFragment;
 import com.vaslim.autopilot.fragments.SettingsFragment;
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     AutopilotFragment autopilotFragment = new AutopilotFragment();
     ManualFragment manualFragment = new ManualFragment();
     SettingsFragment settingsFragment = new SettingsFragment();
+    CompassFragment compassFragment = new CompassFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 switch (item.getItemId()){
                     case R.id.menu_autopilot: {
                         if(ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                            SharedData.mode = SharedData.Mode.GPS;
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,autopilotFragment).commit();
                         }else{
                             Toast.makeText(MainActivity.this, "No location permission", Toast.LENGTH_SHORT).show();
@@ -61,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                     case R.id.menu_manual: {
+                        SharedData.mode = SharedData.Mode.MANUAL;
                         SharedData.targetBearing = -1;
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,manualFragment).commit();
                         return true;
@@ -69,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
                         SharedData.targetBearing = -1;
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,settingsFragment).commit();
                         return true;
+                    }
+                    case R.id.menu_compass:{
+                        SharedData.mode = SharedData.Mode.COMPASS;
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,compassFragment).commit();
                     }
                 }
 

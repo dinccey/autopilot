@@ -63,7 +63,9 @@ public class AutopilotFragment extends Fragment{
                 if (isAdded() && isVisible()) {
                     updateViews(locationResult.getLastLocation());
                 }
-                SharedData.currentBearing = locationResult.getLastLocation().getBearing();
+                if(SharedData.mode == SharedData.Mode.GPS){
+                    SharedData.currentBearing = locationResult.getLastLocation().getBearing();
+                }
 
             }
         };
@@ -118,9 +120,9 @@ public class AutopilotFragment extends Fragment{
 
     private void updateTargetBearing() {
         editTextTargetBearing = AutopilotFragment.this.getActivity().findViewById(R.id.edit_target_bearing);
-        SharedData.targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
-        if(SharedData.targetBearing>=0 && SharedData.targetBearing <=359){
-
+        double targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
+        if(targetBearing>=0 && targetBearing <=359){
+            SharedData.targetBearing = targetBearing;
         }
         else{
             showToast("Target bearing must be 0-359");
