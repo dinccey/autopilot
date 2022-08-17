@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.menu_compass:{
                         SharedData.mode = SharedData.Mode.COMPASS;
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,compassFragment).commit();
+                        return true;
                     }
                 }
 

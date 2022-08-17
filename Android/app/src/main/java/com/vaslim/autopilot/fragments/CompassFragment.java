@@ -122,8 +122,11 @@ public class CompassFragment extends Fragment {
         return new Compass.CompassListener() {
             @Override
             public void onNewAzimuth(final float azimuth) {
-                SharedData.currentBearing = azimuth;
-                System.out.println("NEW AZIMUTH "+azimuth);
+                if(SharedData.mode == SharedData.Mode.COMPASS){
+                    SharedData.currentBearing = azimuth;
+                    System.out.println("NEW AZIMUTH "+SharedData.currentBearing);
+                }
+
                 // UI updates only in UI thread
                 // https://stackoverflow.com/q/11140285/444966
                 CompassFragment.this.getActivity().runOnUiThread(new Runnable() {
