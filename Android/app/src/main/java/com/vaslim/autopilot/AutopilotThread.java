@@ -67,7 +67,7 @@ public class AutopilotThread extends Thread{
             doReturnRudderFromBiggerCorrection(sensitivity);
         }
         //IF RETURNING RUDDER TO NEUTRAL IS COMPLETE
-        if((returningRudder && turnStartTime + timeDifference >= System.currentTimeMillis())){
+        if((returningRudder && turnStartTime + timeDifference <= System.currentTimeMillis())){
             doEndReturnRudder();
         }
         //IF CORRECTING AND EXCEEDED MAX RUDDER TURN
@@ -96,9 +96,9 @@ public class AutopilotThread extends Thread{
         timeDifference = currentTime - turnStartTime;
         timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
         sendToController(committedTurn.getReverseChar());
-        System.out.println("RETURN------"+committedTurn.getReverseChar()+"------");
         turnStartTime = System.currentTimeMillis();
         returningRudder = true; //started returning rudder
+        System.out.println("RETURN------"+committedTurn.getReverseChar()+"------");
     }
 
     private void doBiggerCorrection() {
@@ -127,7 +127,7 @@ public class AutopilotThread extends Thread{
     }
 
     private long reverseTimeCalculate(long time, int sensitivity){
-        return time -(time*(sensitivity/10));
+        return time -(time*(sensitivity/50));
     }
 
     private void sleepMilliseconds(double value) {
