@@ -51,7 +51,7 @@ public class AutopilotThread extends Thread{
     }
 
     private void rudderControl(int sensitivity, long maxLengthOfTurn) {
-        //SMALL CORRECTION UNLESS MAX SMALL TURNS EXCEEDED (negative for LEFT, positive for RIGHT)
+        //SMALL CORRECTION UNLESS OFFSET TOO LARGE AND MAX SMALL TURNS EXCEEDED (negative for LEFT, positive for RIGHT)
         if(committedTurn ==  null  && turn.offsetDegrees < sensitivity &&
                 ((turn.direction == Turn.Direction.RIGHT && smallTurnMiliseconds < MAX_SMALL_TURN_TOTAL)||
                         (turn.direction == Turn.Direction.LEFT && smallTurnMiliseconds > (MAX_SMALL_TURN_TOTAL*-1)))){
@@ -79,7 +79,7 @@ public class AutopilotThread extends Thread{
     private void doExceededMaxTurningTime(int sensitivity, long maxLengthOfTurn) {
         timeDifference = maxLengthOfTurn;
         timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
-        //sendToController(turn.getStopChar());
+        sendToController(turn.getStopChar());
         System.out.println("CORRECTING------MAX TURN------");
     }
 
@@ -93,8 +93,10 @@ public class AutopilotThread extends Thread{
 
     private void doReturnRudderFromBiggerCorrection(int sensitivity) {
         long currentTime = System.currentTimeMillis();
-        timeDifference = currentTime - turnStartTime;
-        timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
+        if(timeDifference == 0){
+            timeDifference = currentTime - turnStartTime;
+            timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
+        }
         sendToController(committedTurn.getReverseChar());
         turnStartTime = System.currentTimeMillis();
         returningRudder = true; //started returning rudder
