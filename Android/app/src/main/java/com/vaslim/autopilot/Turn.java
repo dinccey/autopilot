@@ -3,7 +3,8 @@ package com.vaslim.autopilot;
 public class Turn {
     public enum Direction {
         LEFT,
-        RIGHT
+        RIGHT,
+        NONE
     }
 
     public static final char CHAR_TURN_LEFT = 'L';

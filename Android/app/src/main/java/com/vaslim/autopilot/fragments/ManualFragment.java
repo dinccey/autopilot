@@ -5,10 +5,14 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
+import com.vaslim.autopilot.MainActivity;
 import com.vaslim.autopilot.R;
+import com.vaslim.autopilot.Turn;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,14 +21,7 @@ import com.vaslim.autopilot.R;
  */
 public class ManualFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public ManualFragment() {
         // Required empty public constructor
@@ -42,8 +39,6 @@ public class ManualFragment extends Fragment {
     public static ManualFragment newInstance(String param1, String param2) {
         ManualFragment fragment = new ManualFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,16 +46,42 @@ public class ManualFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_manual, container, false);
+        View view = inflater.inflate(R.layout.fragment_manual, container, false);
+        Button buttonLeft = view.findViewById(R.id.button_left);
+        Button buttonRight = view.findViewById(R.id.button_right);
+        buttonLeft.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()){
+                    case MotionEvent.ACTION_DOWN: {sendToController(Turn.CHAR_TURN_LEFT); return true;}
+                    case MotionEvent.ACTION_UP: {sendToController(Turn.CHAR_TURN_STOP); return true;}
+                }
+                return false;
+            }
+        });
+        buttonRight.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()){
+                    case MotionEvent.ACTION_DOWN: {sendToController(Turn.CHAR_TURN_RIGHT); return true;}
+                    case MotionEvent.ACTION_UP: {sendToController(Turn.CHAR_TURN_STOP); return true;}
+                }
+                return false;
+            }
+        });
+
+        return view;
+    }
+
+    private void sendToController(char command) {
+        System.out.println("COMMAND "+command);
+        MainActivity.ardutooth.sendChar(command);
     }
 }
