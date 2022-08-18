@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/anchor"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="40dp"
         android:gravity="top|left"
         android:text="@string/target"
         android:textSize="25sp" />
@@ -25,9 +25,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/anchor"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="40dp"
         android:layout_toEndOf="@+id/edit_target_bearing_compass"
         android:text="@string/apply" />
+
     <TextView
         android:id="@+id/tv_sensitivity_compass"
         android:layout_width="wrap_content"
@@ -63,7 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/anchor"
         android:layout_marginStart="22dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginTop="40dp"
         android:layout_toEndOf="@+id/tv_target_bearing_label_compass"
         android:inputType="number"
         android:text="0"
