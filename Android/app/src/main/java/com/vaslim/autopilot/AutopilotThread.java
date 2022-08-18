@@ -5,7 +5,7 @@ import com.vaslim.autopilot.fragments.AutopilotFragment;
 public class AutopilotThread extends Thread{
 
     public static final double NORMALIZER = 500;
-    private static final double CYCLE_SLEEP = 00;
+    private static final double CYCLE_SLEEP = 100;
     private static final double DEVIATION_THRESHOLD = 0.7;
     private static final long MAX_SMALL_TURN_TOTAL = 900;
     public static final int SMALL_CORRECTION_MILISECONDS = 300;
@@ -21,6 +21,7 @@ public class AutopilotThread extends Thread{
     private boolean maxTurn = false;
     private int allowedMaxDeviation = 0;
     private char currentTurn;
+    private double offsetDegressDifference; //difference from previous turn
 
 
     public AutopilotThread() {
@@ -38,13 +39,15 @@ public class AutopilotThread extends Thread{
         int sensitivity = 1;
 
         while(running){
-            if(SharedData.targetBearing >= 0 && SharedData.sensitivity >= 1 && SharedData.sensitivity <=10){
+            if(SharedData.targetBearing >= 0 && SharedData.mode!=SharedData.Mode.MANUAL){
                 targetBearing = SharedData.targetBearing;
                 currentBearing = SharedData.currentBearing;
                 sensitivity = SharedData.sensitivity;
                 long maxLengthOfTurn = (long) (3*SMALL_CORRECTION_MILISECONDS);
                 allowedMaxDeviation = sensitivity + 5;
+                double previousTurnOffset = turn.offsetDegrees;
                 calculateTurn(targetBearing,currentBearing);
+                offsetDegressDifference = turn.offsetDegrees - previousTurnOffset;
                 System.out.println("BEARING: "+currentBearing + " TARGET: "+targetBearing + "TURN: "+currentTurn+" "+timeDifference);
 
                 rudderControl(sensitivity, maxLengthOfTurn);
@@ -56,12 +59,13 @@ public class AutopilotThread extends Thread{
     }
 
     private void rudderControl(int sensitivity, long maxLengthOfTurn) {
-        //TIMEOUT
-        if(maxTurn && committedTurn!=null && turnStartTime+TIMEOUT_MILLISECONDS<=System.currentTimeMillis()){
-            committedTurn=null;
-            returningRudder=false;
-            smallTurnMiliseconds = 0;
-            maxTurn = false;
+        //IF MAX TURN WAS TOO LITTLE
+        if(maxTurn && offsetDegressDifference>=0 && turn.offsetDegrees > allowedMaxDeviation){
+            timeDifference+=SMALL_CORRECTION_MILISECONDS;
+            sendToController(turn.getTurnChar());
+            sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+            sendToController(turn.getStopChar());
+
         }
 
         //SMALL CORRECTION UNLESS OFFSET TOO LARGE AND MAX SMALL TURNS EXCEEDED (negative for LEFT, positive for RIGHT)
@@ -131,11 +135,13 @@ public class AutopilotThread extends Thread{
     }
 
     private void doSmallCorrection() {
-        sendToController(turn.getTurnChar());
-        currentTurn = turn.getTurnChar();
-        sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
-        sendToController(turn.getStopChar());
-        currentTurn = turn.getStopChar();
+        if(offsetDegressDifference>=0){ //if there is no improvement in direction
+           sendToController(turn.getTurnChar());
+           currentTurn = turn.getTurnChar();
+           sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+           sendToController(turn.getStopChar());
+           currentTurn = turn.getStopChar();
+        }
         timeDifference = 0;
         if(turn.getTurnChar() == Turn.CHAR_TURN_LEFT && turn.offsetDegrees>allowedMaxDeviation-5){
             smallTurnMiliseconds-=SMALL_CORRECTION_MILISECONDS;
