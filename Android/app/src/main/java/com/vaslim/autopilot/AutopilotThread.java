@@ -74,6 +74,7 @@ public class AutopilotThread extends Thread{
         long currentTime = 0;
         while (currentTime-startTime<=reverseTimeCalculate(turningTimeTotal,SharedData.sensitivity)){
             currentTime = System.currentTimeMillis();
+            if(!isImprovement() && committedTurn.direction == turn.direction) break;
         }
         sendToController(turn.getStopChar());
     }
