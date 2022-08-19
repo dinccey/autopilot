@@ -4,23 +4,13 @@ import com.vaslim.autopilot.fragments.AutopilotFragment;
 
 public class AutopilotThread extends Thread{
 
-    public static final double NORMALIZER = 500;
     private static final double CYCLE_SLEEP = 100;
-    private static final double DEVIATION_THRESHOLD = 0.7;
-    private static final long MAX_SMALL_TURN_TOTAL = 900;
+
     public static final int SMALL_CORRECTION_MILISECONDS = 300;
-    public static final long TIMEOUT_MILLISECONDS = 7000;
+    public static final int BIG_CORRECTION_MULTIPLIER = 3;
 
     private static Turn turn;
-    private Turn committedTurn = null;
-    private long turnStartTime;
-    private long timeDifference = -1;
-    private boolean returningRudder = false;
-    private long smallTurnMiliseconds = 0;
     public volatile boolean running = true;
-    private int allowedMaxDeviation = 0;
-    private char currentTurn;
-    private double offsetDegressDifference; //difference from previous turn
 
 
     public AutopilotThread() {
@@ -67,7 +57,7 @@ public class AutopilotThread extends Thread{
     }
 
     private void bigCorrection(int smallCorrectionDeviation){
-        long turnTimeLimit = 3*SMALL_CORRECTION_MILISECONDS;
+        long turnTimeLimit = BIG_CORRECTION_MULTIPLIER *SMALL_CORRECTION_MILISECONDS;
         long startTime = 0;
         long turningTimeTotal = 0;
         boolean isTurning = false;
