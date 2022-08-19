@@ -1,12 +1,10 @@
 package com.vaslim.autopilot;
 
-import com.vaslim.autopilot.fragments.AutopilotFragment;
-
 public class AutopilotThread extends Thread{
 
     private static final double CYCLE_SLEEP = 100;
 
-    public static final int SMALL_CORRECTION_MILISECONDS = 300;
+    public static final int SMALL_CORRECTION_MILLISECONDS = 300;
     public static final int BIG_CORRECTION_MULTIPLIER = 3;
 
     private static Turn turn;
@@ -23,9 +21,9 @@ public class AutopilotThread extends Thread{
     }
 
     private void autopilot() {
-        double targetBearing = 0;
-        double currentBearing = 0;
-        int sensitivity = 1;
+        double targetBearing;
+        double currentBearing;
+        int sensitivity;
 
         while(running){
             if(SharedData.targetBearing >= 0 && SharedData.mode!=SharedData.Mode.MANUAL){
@@ -49,7 +47,7 @@ public class AutopilotThread extends Thread{
             boolean improvement = isImprovement();
             if(!improvement){
                 sendToController(turn.getTurnChar());
-                sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+                sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
                 sendToController((turn.getStopChar()));
             }
             sleepMilliseconds(CYCLE_SLEEP);
@@ -57,7 +55,7 @@ public class AutopilotThread extends Thread{
     }
 
     private void bigCorrection(int smallCorrectionDeviation){
-        long turnTimeLimit = BIG_CORRECTION_MULTIPLIER *SMALL_CORRECTION_MILISECONDS;
+        long turnTimeLimit = BIG_CORRECTION_MULTIPLIER * SMALL_CORRECTION_MILLISECONDS;
         long startTime = 0;
         long turningTimeTotal = 0;
         boolean isTurning = false;
@@ -93,9 +91,9 @@ public class AutopilotThread extends Thread{
             }
             if(!improvement && maxTurn){
                 sendToController(committedTurn.getTurnChar());
-                sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+                sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
                 sendToController(turn.getStopChar());
-                turningTimeTotal +=SMALL_CORRECTION_MILISECONDS;
+                turningTimeTotal += SMALL_CORRECTION_MILLISECONDS;
 
             }
             if(isTurning && currentTime- startTime >= turnTimeLimit){
@@ -115,7 +113,7 @@ public class AutopilotThread extends Thread{
         double previousOffset = turn.offsetDegrees;
         Turn.Direction previousDirection = turn.direction;
         calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
-        return turn.offsetDegrees - previousOffset < 0 && previousDirection == turn.direction ? true : false;
+        return turn.offsetDegrees - previousOffset < 0 && previousDirection == turn.direction;
     }
 
     private void sendToController(char command) {
