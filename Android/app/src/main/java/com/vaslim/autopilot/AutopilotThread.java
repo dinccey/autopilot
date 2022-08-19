@@ -159,7 +159,8 @@ public class AutopilotThread extends Thread{
     }
 
     private long reverseTimeCalculate(long time, int sensitivity){
-        return time -(time*(sensitivity/6));
+        return time;
+        //return time -(time*(sensitivity/6));
     }
 
     private void sleepMilliseconds(double value) {
