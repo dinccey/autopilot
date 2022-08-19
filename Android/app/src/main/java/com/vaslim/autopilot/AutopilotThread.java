@@ -51,7 +51,7 @@ public class AutopilotThread extends Thread{
                 sendToController((turn.getStopChar()));
             }
             sleepMilliseconds(CYCLE_SLEEP);
-            isImprovement();
+            //isImprovement();
         }
     }
 
@@ -106,7 +106,7 @@ public class AutopilotThread extends Thread{
             }
 
             sleepMilliseconds(CYCLE_SLEEP);
-            isImprovement();
+            //isImprovement();
         }
         sendToController(turn.getStopChar());
         return turningTimeTotal;
