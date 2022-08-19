@@ -46,6 +46,7 @@ public class AutopilotThread extends Thread{
         while(turn.offsetDegrees <= smallCorrectionDeviation){
             boolean improvement = isImprovement();
             if(!improvement){
+                System.out.println("SMALL offset:"+turn.offsetDegrees+" improvement: "+improvement);
                 sendToController(turn.getTurnChar());
                 sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
                 sendToController((turn.getStopChar()));
@@ -76,6 +77,7 @@ public class AutopilotThread extends Thread{
             currentTime = System.currentTimeMillis();
             if(!isImprovement() && committedTurn.direction == turn.direction) break;
         }
+        System.out.println("RETURN RUDDER TIME: "+(System.currentTimeMillis()-startTime));
         sendToController(turn.getStopChar());
     }
 
@@ -104,7 +106,7 @@ public class AutopilotThread extends Thread{
                 isTurning = false;
                 turningTimeTotal = currentTime- startTime;
             }
-
+            System.out.println("BIG TURN offset: "+turn.offsetDegrees+" improvement: "+improvement+ " turnTimeLimit: "+ turnTimeLimit);
             sleepMilliseconds(CYCLE_SLEEP);
             //isImprovement();
         }
@@ -115,8 +117,10 @@ public class AutopilotThread extends Thread{
     private boolean isImprovement() {
         double previousOffset = turn.offsetDegrees;
         Turn.Direction previousDirection = turn.direction;
+        sleepMilliseconds(CYCLE_SLEEP*2);
         calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
-        return turn.offsetDegrees - previousOffset < 0 && previousDirection == turn.direction;
+        System.out.println("TARGET: "+SharedData.targetBearing+ " CURRENT: "+SharedData.currentBearing+ " IMPROVEMENT: "+(turn.offsetDegrees - previousOffset < 0));
+        return turn.offsetDegrees - previousOffset < 0 ;//&& previousDirection == turn.direction;
     }
 
     private void sendToController(char command) {
