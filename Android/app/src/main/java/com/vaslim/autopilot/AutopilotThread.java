@@ -43,7 +43,7 @@ public class AutopilotThread extends Thread{
                 targetBearing = SharedData.targetBearing;
                 currentBearing = SharedData.currentBearing;
                 sensitivity = SharedData.sensitivity;
-                long maxLengthOfTurn = (long) (3*SMALL_CORRECTION_MILISECONDS);
+                long maxLengthOfTurn = (long) (4*SMALL_CORRECTION_MILISECONDS);
                 allowedMaxDeviation = sensitivity + 5;
                 double previousTurnOffset = turn.offsetDegrees;
                 calculateTurn(targetBearing,currentBearing);
@@ -61,7 +61,7 @@ public class AutopilotThread extends Thread{
     private void rudderControl(int sensitivity, long maxLengthOfTurn) {
         //IF MAX TURN WAS TOO LITTLE
         if(maxTurn && offsetDegressDifference>=0 && turn.offsetDegrees > allowedMaxDeviation){
-            timeDifference+=SMALL_CORRECTION_MILISECONDS;
+            //timeDifference+=SMALL_CORRECTION_MILISECONDS;
             sendToController(turn.getTurnChar());
             sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
             sendToController(turn.getStopChar());
@@ -108,15 +108,17 @@ public class AutopilotThread extends Thread{
         System.out.println("END--------------");
         committedTurn = null; //the current commited turn has completed
         returningRudder = false;
+        maxTurn = false;
         smallTurnMiliseconds = 0; //RESET small turns cummulative value
         timeDifference = 0;
     }
 
     private void doReturnRudderFromBiggerCorrection(int sensitivity) {
         long currentTime = System.currentTimeMillis();
-        if(timeDifference == 0){ //if not exceeded max turning time
-            timeDifference = currentTime - turnStartTime;
+        if(!maxTurn){ //if not exceeded max turning time
+            timeDifference = currentTime - turnStartTime; //TODO too long
             timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
+            System.out.println("!maxTurn RETURN FROM BIGGER CORRECTION - timeDifference: "+timeDifference);
         }
         sendToController(committedTurn.getReverseChar()); //reverse turning direction
         currentTurn = committedTurn.getReverseChar();
