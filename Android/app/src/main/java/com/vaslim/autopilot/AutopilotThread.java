@@ -18,7 +18,6 @@ public class AutopilotThread extends Thread{
     private boolean returningRudder = false;
     private long smallTurnMiliseconds = 0;
     public volatile boolean running = true;
-    private boolean maxTurn = false;
     private int allowedMaxDeviation = 0;
     private char currentTurn;
     private double offsetDegressDifference; //difference from previous turn
@@ -43,113 +42,85 @@ public class AutopilotThread extends Thread{
                 targetBearing = SharedData.targetBearing;
                 currentBearing = SharedData.currentBearing;
                 sensitivity = SharedData.sensitivity;
-                long maxLengthOfTurn = (long) (3*SMALL_CORRECTION_MILISECONDS);
-                allowedMaxDeviation = sensitivity + 5;
-                double previousTurnOffset = turn.offsetDegrees;
+                int smallCorrectionDeviation = sensitivity + 5;
                 calculateTurn(targetBearing,currentBearing);
-                offsetDegressDifference = turn.offsetDegrees - previousTurnOffset;
-                System.out.println("BEARING: "+currentBearing + " TARGET: "+targetBearing + "TURN: "+currentTurn+" "+timeDifference);
-
-                rudderControl(sensitivity, maxLengthOfTurn);
-
-                sleepMilliseconds(CYCLE_SLEEP); //bearing updates are not super fast
+                if(turn.offsetDegrees <= smallCorrectionDeviation){
+                    smallCorrection(smallCorrectionDeviation);
+                }else{
+                    bigCorrection(smallCorrectionDeviation);
+                }
 
             }
         }
     }
 
-    private void rudderControl(int sensitivity, long maxLengthOfTurn) {
-        //IF MAX TURN WAS TOO LITTLE
-        if(maxTurn && offsetDegressDifference>=0 && turn.offsetDegrees > allowedMaxDeviation){
-            timeDifference+=SMALL_CORRECTION_MILISECONDS;
-            sendToController(turn.getTurnChar());
-            sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
-            sendToController(turn.getStopChar());
-
-        }
-
-        //SMALL CORRECTION UNLESS OFFSET TOO LARGE AND MAX SMALL TURNS EXCEEDED (negative for LEFT, positive for RIGHT)
-        if(committedTurn ==  null  && turn.offsetDegrees < allowedMaxDeviation &&
-                ((turn.direction == Turn.Direction.RIGHT && smallTurnMiliseconds < MAX_SMALL_TURN_TOTAL)||
-                        (turn.direction == Turn.Direction.LEFT && smallTurnMiliseconds > (MAX_SMALL_TURN_TOTAL*-1)))){
-            doSmallCorrection();
-        }
-        //IF NOT CORRECTING AND NEEDS CORrECTiNG
-        else if(committedTurn ==  null  && turn.offsetDegrees > allowedMaxDeviation){
-            doBiggerCorrection();
-        }
-        //IF CORRECTING AND SHOULD START RETURNING RUDDER TO NEUTRAL
-        else if(committedTurn != null && !returningRudder && turn.offsetDegrees < allowedMaxDeviation){
-        //else if(committedTurn != null && !returningRudder && turn.offsetDegrees < sensitivity && committedTurn.direction == turn.direction){
-            doReturnRudderFromBiggerCorrection(sensitivity);
-        }
-        //IF RETURNING RUDDER TO NEUTRAL IS COMPLETE
-        if((returningRudder && turnStartTime + timeDifference <= System.currentTimeMillis())){
-            doEndReturnRudder();
-        }
-        //IF CORRECTING AND EXCEEDED MAX RUDDER TURN
-        if(committedTurn != null && !returningRudder && (System.currentTimeMillis() - turnStartTime) >= maxLengthOfTurn && !maxTurn){
-            doExceededMaxTurningTime(sensitivity, maxLengthOfTurn);
+    private void smallCorrection(int smallCorrectionDeviation){
+        while(turn.offsetDegrees <= smallCorrectionDeviation){
+            boolean improvement = isImprovement();
+            if(!improvement){
+                sendToController(turn.getTurnChar());
+                sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+                sendToController((turn.getStopChar()));
+            }
+            sleepMilliseconds(CYCLE_SLEEP);
         }
     }
 
-    private void doExceededMaxTurningTime(int sensitivity, long maxLengthOfTurn) {
-        timeDifference = maxLengthOfTurn;
-        timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
+    private void bigCorrection(int smallCorrectionDeviation){
+        long turnTimeLimit = 3*SMALL_CORRECTION_MILISECONDS;
+        long startTime = 0;
+        long turningTimeTotal = 0;
+        boolean isTurning = false;
+        boolean maxTurn = false;
+        Turn committedTurn = calculateTurn(SharedData.targetBearing,SharedData.currentBearing);
+        turningTimeTotal = getTurningTimeTotal(smallCorrectionDeviation, turnTimeLimit, startTime, turningTimeTotal, isTurning, maxTurn, committedTurn);
+        //RETURN RUDDER
+        sendToController(committedTurn.getReverseChar());
+        startTime = System.currentTimeMillis();
+        long currentTime = 0;
+        while (currentTime-startTime<=reverseTimeCalculate(turningTimeTotal,SharedData.sensitivity)){
+            currentTime = System.currentTimeMillis();
+        }
         sendToController(turn.getStopChar());
-        currentTurn = turn.getStopChar();
-        maxTurn = true;
-        System.out.println("CORRECTING------MAX TURN------");
     }
 
-    private void doEndReturnRudder() {
+    private long getTurningTimeTotal(int smallCorrectionDeviation, long turnTimeLimit, long startTime, long turningTimeTotal, boolean isTurning, boolean maxTurn, Turn committedTurn) {
+        while (turn.offsetDegrees>= smallCorrectionDeviation){
+            boolean improvement = isImprovement();
+            long currentTime = System.currentTimeMillis();
+            if(isTurning){
+                turningTimeTotal = currentTime-startTime;
+            }
+            if(!improvement && !maxTurn){
+                sendToController(committedTurn.getTurnChar());
+                startTime = System.currentTimeMillis();
+                isTurning = true;
+            }
+            if(!improvement && maxTurn){
+                sendToController(committedTurn.getTurnChar());
+                sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
+                sendToController(turn.getStopChar());
+                turningTimeTotal +=SMALL_CORRECTION_MILISECONDS;
+
+            }
+            if(isTurning && currentTime- startTime >= turnTimeLimit){
+                sendToController(turn.getStopChar());
+                maxTurn = true;
+                isTurning = false;
+                turningTimeTotal = currentTime- startTime;
+            }
+
+            sleepMilliseconds(CYCLE_SLEEP);
+        }
         sendToController(turn.getStopChar());
-        currentTurn = turn.getStopChar();
-        System.out.println("END--------------");
-        committedTurn = null; //the current commited turn has completed
-        returningRudder = false;
-        smallTurnMiliseconds = 0; //RESET small turns cummulative value
-        timeDifference = 0;
+        return turningTimeTotal;
     }
 
-    private void doReturnRudderFromBiggerCorrection(int sensitivity) {
-        long currentTime = System.currentTimeMillis();
-        if(timeDifference == 0){ //if not exceeded max turning time
-            timeDifference = currentTime - turnStartTime;
-            timeDifference = reverseTimeCalculate(timeDifference, sensitivity);
-        }
-        sendToController(committedTurn.getReverseChar()); //reverse turning direction
-        currentTurn = committedTurn.getReverseChar();
-        turnStartTime = System.currentTimeMillis(); //get time when started turning
-        returningRudder = true; //started returning rudder
-        System.out.println("RETURN------"+committedTurn.getReverseChar()+"------");
-    }
-
-    private void doBiggerCorrection() {
-        committedTurn = new Turn(turn.direction,turn.offsetDegrees);
-        sendToController(committedTurn.getTurnChar());
-        currentTurn = turn.getTurnChar();
-        turnStartTime = System.currentTimeMillis();
-        timeDifference = 0;
-        System.out.println("------"+committedTurn.getTurnChar()+"------");
-    }
-
-    private void doSmallCorrection() {
-        if(offsetDegressDifference>=0){ //if there is no improvement in direction
-           sendToController(turn.getTurnChar());
-           currentTurn = turn.getTurnChar();
-           sleepMilliseconds(SMALL_CORRECTION_MILISECONDS);
-           sendToController(turn.getStopChar());
-           currentTurn = turn.getStopChar();
-        }
-        timeDifference = 0;
-        if(turn.getTurnChar() == Turn.CHAR_TURN_LEFT && turn.offsetDegrees>allowedMaxDeviation-5){
-            smallTurnMiliseconds-=SMALL_CORRECTION_MILISECONDS;
-        }
-        else if(turn.getTurnChar() == Turn.CHAR_TURN_RIGHT && turn.offsetDegrees>allowedMaxDeviation-5){
-            smallTurnMiliseconds+=SMALL_CORRECTION_MILISECONDS;
-        }
-        sleepMilliseconds(NORMALIZER*2); //sleep a little bit before reviewing changes
+    private boolean isImprovement() {
+        double previousOffset = turn.offsetDegrees;
+        Turn.Direction previousDirection = turn.direction;
+        calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
+        return turn.offsetDegrees - previousOffset < 0 && previousDirection == turn.direction ? true : false;
     }
 
     private void sendToController(char command) {
@@ -169,7 +140,7 @@ public class AutopilotThread extends Thread{
         }
     }
 
-    private void calculateTurn(double destination, double origin){
+    private Turn calculateTurn(double destination, double origin){
         double LH = origin - destination;
         if(LH<0) LH+=360;
         double RH = destination - origin;
@@ -186,5 +157,6 @@ public class AutopilotThread extends Thread{
         }
         turn.direction = direction;
         turn.offsetDegrees = offsetDegrees;
+        return new Turn(turn.direction,turn.offsetDegrees);
     }
 }
