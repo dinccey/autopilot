@@ -65,6 +65,11 @@ public class AutopilotThread extends Thread{
         Turn committedTurn = calculateTurn(SharedData.targetBearing,SharedData.currentBearing);
         turningTimeTotal = getTurningTimeTotal(smallCorrectionDeviation, turnTimeLimit, startTime, turningTimeTotal, isTurning, maxTurn, committedTurn);
         //RETURN RUDDER
+        returnRudder(turningTimeTotal, committedTurn);
+    }
+
+    private void returnRudder(long turningTimeTotal, Turn committedTurn) {
+        long startTime;
         sendToController(committedTurn.getReverseChar());
         startTime = System.currentTimeMillis();
         long currentTime = 0;
