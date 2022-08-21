@@ -44,7 +44,7 @@ public class AutopilotThread extends Thread{
                 currentBearing = SharedData.currentBearing;
                 sensitivity = SharedData.sensitivity;
                 long maxLengthOfTurn = (long) (4*SMALL_CORRECTION_MILISECONDS);
-                allowedMaxDeviation = sensitivity + 5;
+                allowedMaxDeviation = sensitivity + 4;
                 double previousTurnOffset = turn.offsetDegrees;
                 calculateTurn(targetBearing,currentBearing);
                 offsetDegressDifference = turn.offsetDegrees - previousTurnOffset;
