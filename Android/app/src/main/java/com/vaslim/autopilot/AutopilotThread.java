@@ -6,9 +6,13 @@ public class AutopilotThread extends Thread{
 
     public static final int SMALL_CORRECTION_MILLISECONDS = 300;
     public static final int BIG_CORRECTION_MULTIPLIER = 3;
+    private static final long MAX_SMALL_TURN_CUMULATIVE = 1500;
+    private static final long MAX_SMALL_TURN_CUMULATIVE_TIMEOUT = 5000;
 
     private static Turn turn;
     public volatile boolean running = true;
+    private boolean reachedMaxSmallTurnLimit = false;
+    private long reachedMaxSmallTurnLimitTimestamp;
 
 
     public AutopilotThread() {
@@ -43,18 +47,27 @@ public class AutopilotThread extends Thread{
     }
 
     private void smallCorrection(int smallCorrectionDeviation){
+        long maxTurnTime = 0;//negative for LEFT, positive for RIGHT
         while(turn.offsetDegrees <= smallCorrectionDeviation){
             boolean improvement = isImprovement();
             if(!improvement){
                 System.out.println("SMALL offset:"+turn.offsetDegrees+" improvement: "+improvement);
-                sendToController(turn.getTurnChar());
-                sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
-                sendToController((turn.getStopChar()));
+                if(Math.abs(maxTurnTime) > MAX_SMALL_TURN_CUMULATIVE){
+                    maxTurnTime = updateMaxTurnTime(maxTurnTime, turn.getTurnChar());
+                    sendToController(turn.getTurnChar());
+                    sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
+                    sendToController((turn.getStopChar()));
+                }
+                if(reachedMaxSmallTurnLimit && smallTurnLimitTimeout()){
+                    if(maxTurnTime>0) maxTurnTime = maxTurnTime - SMALL_CORRECTION_MILLISECONDS;
+                    else if(maxTurnTime<0) maxTurnTime = maxTurnTime + SMALL_CORRECTION_MILLISECONDS;
+                }
             }
             sleepMilliseconds(CYCLE_SLEEP);
             //isImprovement();
         }
     }
+
 
     private void bigCorrection(int smallCorrectionDeviation){
         long turnTimeLimit = BIG_CORRECTION_MULTIPLIER * SMALL_CORRECTION_MILLISECONDS;
@@ -72,7 +85,7 @@ public class AutopilotThread extends Thread{
         long startTime;
         sendToController(committedTurn.getReverseChar());
         startTime = System.currentTimeMillis();
-        long currentTime = 0;
+        long currentTime = System.currentTimeMillis();
         while (currentTime-startTime<=reverseTimeCalculate(turningTimeTotal,SharedData.sensitivity)){
             currentTime = System.currentTimeMillis();
             if(!isImprovement() && committedTurn.direction == turn.direction) break;
@@ -117,10 +130,34 @@ public class AutopilotThread extends Thread{
     private boolean isImprovement() {
         double previousOffset = turn.offsetDegrees;
         Turn.Direction previousDirection = turn.direction;
-        sleepMilliseconds(CYCLE_SLEEP*2);
+        sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS*2);
         calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
         System.out.println("TARGET: "+SharedData.targetBearing+ " CURRENT: "+SharedData.currentBearing+ " IMPROVEMENT: "+(turn.offsetDegrees - previousOffset < 0));
         return turn.offsetDegrees - previousOffset < 0 ;//&& previousDirection == turn.direction;
+    }
+
+    private boolean smallTurnLimitTimeout() {
+        long currentTime = System.currentTimeMillis();
+        if(currentTime-reachedMaxSmallTurnLimitTimestamp > MAX_SMALL_TURN_CUMULATIVE_TIMEOUT){
+            return true;
+        }
+        return false;
+    }
+
+    private long updateMaxTurnTime(long maxTurnTime, char turnChar) {
+        if(turnChar == Turn.CHAR_TURN_LEFT){
+            maxTurnTime = maxTurnTime - SMALL_CORRECTION_MILLISECONDS;
+        }
+        else if(turnChar == Turn.CHAR_TURN_RIGHT){
+            maxTurnTime = maxTurnTime + SMALL_CORRECTION_MILLISECONDS;
+        }
+        if(Math.abs(maxTurnTime) > MAX_SMALL_TURN_CUMULATIVE){
+            reachedMaxSmallTurnLimit = true;
+            reachedMaxSmallTurnLimitTimestamp = System.currentTimeMillis();
+        }else{
+            reachedMaxSmallTurnLimit = false;
+        }
+        return maxTurnTime;
     }
 
     private void sendToController(char command) {
