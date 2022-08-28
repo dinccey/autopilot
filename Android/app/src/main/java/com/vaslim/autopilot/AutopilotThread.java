@@ -53,7 +53,8 @@ public class AutopilotThread extends Thread{
             boolean improvement = isImprovement();
             if(!improvement){
                 System.out.println("SMALL offset:"+turn.offsetDegrees+" improvement: "+improvement);
-                if(Math.abs(maxTurnTime) < MAX_SMALL_TURN_CUMULATIVE){
+                if((maxTurnTime*-1 < MAX_SMALL_TURN_CUMULATIVE && turn.getTurnChar() == Turn.CHAR_TURN_LEFT) ||
+                        (maxTurnTime < MAX_SMALL_TURN_CUMULATIVE && turn.getTurnChar() == Turn.CHAR_TURN_RIGHT)){
                     System.out.println("SMALL TURN "+ turn.getTurnChar());
                     maxTurnTime = updateMaxTurnTime(maxTurnTime, turn.getTurnChar());
                     sendToController(turn.getTurnChar());
@@ -135,7 +136,7 @@ public class AutopilotThread extends Thread{
         Turn.Direction previousDirection = turn.direction;
         sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS*2);
         calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
-        System.out.println("TARGET: "+SharedData.targetBearing+ " CURRENT: "+SharedData.currentBearing+ " IMPROVEMENT: "+(turn.offsetDegrees - previousOffset < 0));
+        System.out.println("TARGET: "+SharedData.targetBearing+ " CURRENT: "+SharedData.currentBearing+ " IMPROVEMENT: "+(turn.offsetDegrees - previousOffset < IS_IMPROVEMENT_THRESHOLD));
         return turn.offsetDegrees - previousOffset < IS_IMPROVEMENT_THRESHOLD ;//&& previousDirection == turn.direction;
     }
 
