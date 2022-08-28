@@ -52,13 +52,15 @@ public class AutopilotThread extends Thread{
             boolean improvement = isImprovement();
             if(!improvement){
                 System.out.println("SMALL offset:"+turn.offsetDegrees+" improvement: "+improvement);
-                if(Math.abs(maxTurnTime) > MAX_SMALL_TURN_CUMULATIVE){
+                if(Math.abs(maxTurnTime) < MAX_SMALL_TURN_CUMULATIVE){
+                    System.out.println("SMALL TURN "+ turn.getTurnChar());
                     maxTurnTime = updateMaxTurnTime(maxTurnTime, turn.getTurnChar());
                     sendToController(turn.getTurnChar());
                     sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
                     sendToController((turn.getStopChar()));
                 }
                 if(reachedMaxSmallTurnLimit && smallTurnLimitTimeout()){
+                    System.out.println("SMALL TURN LIMIT TIMEOUT "+maxTurnTime);
                     if(maxTurnTime>0) maxTurnTime = maxTurnTime - SMALL_CORRECTION_MILLISECONDS;
                     else if(maxTurnTime<0) maxTurnTime = maxTurnTime + SMALL_CORRECTION_MILLISECONDS;
                 }
@@ -88,7 +90,7 @@ public class AutopilotThread extends Thread{
         long currentTime = System.currentTimeMillis();
         while (currentTime-startTime<=reverseTimeCalculate(turningTimeTotal,SharedData.sensitivity)){
             currentTime = System.currentTimeMillis();
-            if(!isImprovement() && committedTurn.direction == turn.direction) break;
+            //if(!isImprovement() && committedTurn.direction == turn.direction) break;//TODO remove
         }
         System.out.println("RETURN RUDDER TIME: "+(System.currentTimeMillis()-startTime));
         sendToController(turn.getStopChar());
