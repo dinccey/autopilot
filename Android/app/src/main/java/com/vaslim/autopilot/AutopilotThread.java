@@ -89,12 +89,9 @@ public class AutopilotThread extends Thread{
         long startTime;
         sendToController(committedTurn.getReverseChar());
         startTime = System.currentTimeMillis();
-        long currentTime = System.currentTimeMillis();
-        while (currentTime-startTime<=reverseTimeCalculate(turningTimeTotal,SharedData.sensitivity)){
-            currentTime = System.currentTimeMillis();
-            //if(!isImprovement() && committedTurn.direction == turn.direction) break;//TODO remove
-        }
-        System.out.println("RETURN RUDDER TIME: "+(System.currentTimeMillis()-startTime));
+        long sleepTime = reverseTimeCalculate(turningTimeTotal,SharedData.sensitivity);
+        sleepMilliseconds(sleepTime);
+        System.out.println("RETURN RUDDER TIME: "+ sleepTime);
         sendToController(turn.getStopChar());
     }
 
@@ -114,6 +111,7 @@ public class AutopilotThread extends Thread{
                 sendToController(committedTurn.getTurnChar());
                 sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
                 sendToController(turn.getStopChar());
+                isTurning = false;
                 turningTimeTotal += SMALL_CORRECTION_MILLISECONDS;
 
             }
@@ -124,8 +122,6 @@ public class AutopilotThread extends Thread{
                 turningTimeTotal = currentTime- startTime;
             }
             System.out.println("BIG TURN offset: "+turn.offsetDegrees+" improvement: "+improvement+ " turnTimeLimit: "+ turnTimeLimit);
-            sleepMilliseconds(CYCLE_SLEEP);
-            //isImprovement();
         }
         sendToController(turn.getStopChar());
         return turningTimeTotal;
@@ -171,7 +167,9 @@ public class AutopilotThread extends Thread{
     }
 
     private long reverseTimeCalculate(long time, int sensitivity){
-        return time -(time*(sensitivity/50));
+        long time2 = (long) (time*0.2*sensitivity);
+        if(time2>time) time2 = time;
+        return time2;
     }
 
     private void sleepMilliseconds(double value) {
