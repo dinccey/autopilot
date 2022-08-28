@@ -8,6 +8,7 @@ public class AutopilotThread extends Thread{
     public static final int BIG_CORRECTION_MULTIPLIER = 3;
     private static final long MAX_SMALL_TURN_CUMULATIVE = 1500;
     private static final long MAX_SMALL_TURN_CUMULATIVE_TIMEOUT = 5000;
+    private static final double IS_IMPROVEMENT_THRESHOLD = -0.5;
 
     private static Turn turn;
     public volatile boolean running = true;
@@ -135,11 +136,12 @@ public class AutopilotThread extends Thread{
         sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS*2);
         calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
         System.out.println("TARGET: "+SharedData.targetBearing+ " CURRENT: "+SharedData.currentBearing+ " IMPROVEMENT: "+(turn.offsetDegrees - previousOffset < 0));
-        return turn.offsetDegrees - previousOffset < 0 ;//&& previousDirection == turn.direction;
+        return turn.offsetDegrees - previousOffset < IS_IMPROVEMENT_THRESHOLD ;//&& previousDirection == turn.direction;
     }
 
     private boolean smallTurnLimitTimeout() {
         long currentTime = System.currentTimeMillis();
+        System.out.println("SMALL TURN TIMEOUT RECHED");
         if(currentTime-reachedMaxSmallTurnLimitTimestamp > MAX_SMALL_TURN_CUMULATIVE_TIMEOUT){
             return true;
         }
@@ -159,6 +161,7 @@ public class AutopilotThread extends Thread{
         }else{
             reachedMaxSmallTurnLimit = false;
         }
+        System.out.println("maxTurnTime "+maxTurnTime);
         return maxTurnTime;
     }
 
