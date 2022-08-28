@@ -8,7 +8,7 @@ public class AutopilotThread extends Thread{
     public static final int BIG_CORRECTION_MULTIPLIER = 3;
     private static final long MAX_SMALL_TURN_CUMULATIVE = 1500;
     private static final long MAX_SMALL_TURN_CUMULATIVE_TIMEOUT = 5000;
-    private static final double IS_IMPROVEMENT_THRESHOLD = -0.5;
+    private static final double IS_IMPROVEMENT_THRESHOLD = 0.5;
 
     private static Turn turn;
     public volatile boolean running = true;
