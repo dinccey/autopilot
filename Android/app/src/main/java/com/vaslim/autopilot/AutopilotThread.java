@@ -152,7 +152,7 @@ public class AutopilotThread extends Thread{
         else if(turnChar == Turn.CHAR_TURN_RIGHT){
             maxTurnTime = maxTurnTime + SMALL_CORRECTION_MILLISECONDS;
         }
-        if(Math.abs(maxTurnTime) > MAX_SMALL_TURN_CUMULATIVE){
+        if(Math.abs(maxTurnTime) >= MAX_SMALL_TURN_CUMULATIVE){
             reachedMaxSmallTurnLimit = true;
             reachedMaxSmallTurnLimitTimestamp = System.currentTimeMillis();
         }else{
