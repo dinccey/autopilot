@@ -5,10 +5,10 @@ public class AutopilotThread extends Thread{
     private static final double CYCLE_SLEEP = 100;
 
     public static final int SMALL_CORRECTION_MILLISECONDS = 300;
-    public static final int BIG_CORRECTION_MULTIPLIER = 3;
-    private static final long MAX_SMALL_TURN_CUMULATIVE = 1500;
+    public static final int BIG_CORRECTION_MULTIPLIER = 2;
+    private static final long MAX_SMALL_TURN_CUMULATIVE = 1000;
     private static final long MAX_SMALL_TURN_CUMULATIVE_TIMEOUT = 5000;
-    private static final double IS_IMPROVEMENT_THRESHOLD = 0.3;
+    private static final double IS_IMPROVEMENT_THRESHOLD = 0.7;
 
     private static Turn turn;
     public volatile boolean running = true;
@@ -121,7 +121,7 @@ public class AutopilotThread extends Thread{
                 isTurning = false;
                 turningTimeTotal = currentTime- startTime;
             }
-            System.out.println("BIG TURN offset: "+turn.offsetDegrees+" improvement: "+improvement+ " turnTimeLimit: "+ turnTimeLimit);
+            System.out.println("BIG TURN offset: "+turn.offsetDegrees+" improvement: "+improvement+ " turnTimeLimit: "+ turnTimeLimit + "turnTimeTotal: "+turningTimeTotal);
         }
         sendToController(turn.getStopChar());
         return turningTimeTotal;
@@ -130,7 +130,7 @@ public class AutopilotThread extends Thread{
     private boolean isImprovement() {
         double previousOffset = turn.offsetDegrees;
         Turn.Direction previousDirection = turn.direction;
-        sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS*2);
+        sleepMilliseconds(SMALL_CORRECTION_MILLISECONDS);
         calculateTurn(SharedData.targetBearing, SharedData.currentBearing);
         System.out.println("TARGET: "+SharedData.targetBearing+ " CURRENT: "+SharedData.currentBearing+ " IMPROVEMENT: "+(turn.offsetDegrees - previousOffset < IS_IMPROVEMENT_THRESHOLD));
         return turn.offsetDegrees - previousOffset < IS_IMPROVEMENT_THRESHOLD ;//&& previousDirection == turn.direction;
