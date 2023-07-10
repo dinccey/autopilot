@@ -7,8 +7,6 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.MenuItem;
@@ -16,7 +14,7 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import com.vaslim.autopilot.fragments.AutopilotFragment;
+import com.vaslim.autopilot.fragments.GPSFragment;
 import com.vaslim.autopilot.fragments.CompassFragment;
 import com.vaslim.autopilot.fragments.ManualFragment;
 import com.vaslim.autopilot.fragments.SettingsFragment;
@@ -32,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mLocationPermissionGranted = false;
 
     public static Ardutooth ardutooth;
-    AutopilotFragment autopilotFragment = new AutopilotFragment();
+    GPSFragment gpsFragment = new GPSFragment();
     ManualFragment manualFragment = new ManualFragment();
     SettingsFragment settingsFragment = new SettingsFragment();
     CompassFragment compassFragment = new CompassFragment();
@@ -72,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.menu_autopilot: {
                         if(ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
                             SharedData.mode = SharedData.Mode.GPS;
-                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,autopilotFragment).commit();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,gpsFragment).commit();
                         }else{
                             Toast.makeText(MainActivity.this, "No location permission", Toast.LENGTH_SHORT).show();
                         }

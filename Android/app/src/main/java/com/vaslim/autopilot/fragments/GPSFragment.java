@@ -18,7 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -29,22 +28,18 @@ import com.vaslim.autopilot.R;
 import com.vaslim.autopilot.SharedData;
 
 
-public class AutopilotFragment extends Fragment{
+public class GPSFragment extends Fragment{
 
     public static final int DEFAULT_UPDATE_INTERVAL = 100;
     public static final int FAST_UPDATE_INTERVAL = 50;
     FusedLocationProviderClient fusedLocationProviderClient;
     LocationRequest locationRequest;
     LocationCallback locationCallback;
-
-    //public static volatile double targetBearing = -1;
-    //public static double currentBearing = -1;
-    //public static int sensitivity = 3;
     TextView tvGPSBearing, tvGPSAccuracy;
     EditText editTextTargetBearing;
     Button buttonApply;
 
-    public AutopilotFragment() {
+    public GPSFragment() {
         // Required empty public constructor
     }
 
@@ -96,7 +91,7 @@ public class AutopilotFragment extends Fragment{
 
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_autopilot, container, false);
+        View view = inflater.inflate(R.layout.fragment_gps, container, false);
         //register button listeners
         buttonApply = view.findViewById(R.id.button_apply);
         buttonApply.setOnClickListener(view1 -> updateTargetBearing());
@@ -108,7 +103,7 @@ public class AutopilotFragment extends Fragment{
     }
 
     private void updateSensitivity() {
-        EditText editTextSensitivity = AutopilotFragment.this.getActivity().findViewById(R.id.edit_sensitivity);
+        EditText editTextSensitivity = GPSFragment.this.getActivity().findViewById(R.id.edit_sensitivity);
         int value = Integer.parseInt(editTextSensitivity.getText().toString());
         if(value>=1 && value<=10){
             SharedData.sensitivity = value;
@@ -119,7 +114,7 @@ public class AutopilotFragment extends Fragment{
     }
 
     private void updateTargetBearing() {
-        editTextTargetBearing = AutopilotFragment.this.getActivity().findViewById(R.id.edit_target_bearing);
+        editTextTargetBearing = GPSFragment.this.getActivity().findViewById(R.id.edit_target_bearing);
         double targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
         if(targetBearing>=0 && targetBearing <=359){
             SharedData.targetBearing = targetBearing;
