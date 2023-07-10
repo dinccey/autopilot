@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,autopilotFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, compassFragment).commit();
 
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
