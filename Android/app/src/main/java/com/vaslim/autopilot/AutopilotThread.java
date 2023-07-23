@@ -4,11 +4,11 @@ public class AutopilotThread extends Thread{
 
     private static final double CYCLE_SLEEP = 100;
 
-    public static final int SMALL_CORRECTION_MILLISECONDS = 300;
+    public static final int SMALL_CORRECTION_MILLISECONDS = 500;
     public static final int BIG_CORRECTION_MULTIPLIER = 2;
-    private static final long MAX_SMALL_TURN_CUMULATIVE = 1000;
+    private static final long MAX_SMALL_TURN_CUMULATIVE = 1500;
     private static final long MAX_SMALL_TURN_CUMULATIVE_TIMEOUT = 5000;
-    private static final double IS_IMPROVEMENT_THRESHOLD = 0.7;
+    private static final double IS_IMPROVEMENT_THRESHOLD = 0.0;
 
     private static Turn turn;
     public volatile boolean running = true;
@@ -168,7 +168,7 @@ public class AutopilotThread extends Thread{
 
     private long reverseTimeCalculate(long time, int sensitivity){
         long time2 = (long) (time*0.2*sensitivity);
-        if(time2>time) time2 = time;
+        if(time2<time) time2 = time;
         return time2;
     }
 
