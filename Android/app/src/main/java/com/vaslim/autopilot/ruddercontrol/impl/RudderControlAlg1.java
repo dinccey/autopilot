@@ -1,6 +1,11 @@
-package com.vaslim.autopilot;
+package com.vaslim.autopilot.ruddercontrol.impl;
 
-public class AutopilotThread extends Thread{
+import com.vaslim.autopilot.MainActivity;
+import com.vaslim.autopilot.SharedData;
+import com.vaslim.autopilot.Turn;
+import com.vaslim.autopilot.ruddercontrol.RudderControlRunnable;
+
+public class RudderControlAlg1 implements RudderControlRunnable, Runnable {
 
     private static final double CYCLE_SLEEP = 100;
 
@@ -11,18 +16,23 @@ public class AutopilotThread extends Thread{
     private static final double IS_IMPROVEMENT_THRESHOLD = 0.0;
 
     private static Turn turn;
-    public volatile boolean running = true;
+    private boolean running = true;
     private boolean reachedMaxSmallTurnLimit = false;
     private long reachedMaxSmallTurnLimitTimestamp;
 
 
-    public AutopilotThread() {
+    public RudderControlAlg1() {
         turn = new Turn();
 
     }
 
     public void run(){
         autopilot();
+    }
+
+    @Override
+    public void shutdown() {
+        this.running = false;
     }
 
     private void autopilot() {
@@ -45,6 +55,7 @@ public class AutopilotThread extends Thread{
 
             }
         }
+        MainActivity.rudderControlRunnable = null;
     }
 
     private void smallCorrection(int smallCorrectionDeviation){
@@ -175,7 +186,7 @@ public class AutopilotThread extends Thread{
     private void sleepMilliseconds(double value) {
         //System.out.println("SLEEP: "+value+" ms");
         try {
-            sleep((long) value);
+             Thread.sleep((long) value);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

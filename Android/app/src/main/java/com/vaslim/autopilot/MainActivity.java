@@ -15,9 +15,12 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.vaslim.autopilot.fragments.GPSFragment;
-import com.vaslim.autopilot.fragments.CompassFragment;
+import com.vaslim.autopilot.fragments.compass.CompassFragment1;
+import com.vaslim.autopilot.fragments.compass.CompassFragment2;
+import com.vaslim.autopilot.fragments.compass.CompassFragmentAbstract;
 import com.vaslim.autopilot.fragments.ManualFragment;
 import com.vaslim.autopilot.fragments.SettingsFragment;
+import com.vaslim.autopilot.ruddercontrol.RudderControlRunnable;
 
 import io.github.giuseppebrb.ardutooth.Ardutooth;
 
@@ -29,17 +32,19 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted = false;
 
+    public static RudderControlRunnable rudderControlRunnable = null;
     public static Ardutooth ardutooth;
     GPSFragment gpsFragment = new GPSFragment();
     ManualFragment manualFragment = new ManualFragment();
     SettingsFragment settingsFragment = new SettingsFragment();
-    CompassFragment compassFragment = new CompassFragment();
+    CompassFragmentAbstract compassFragment1 = new CompassFragment1();
+    CompassFragmentAbstract compassFragment2 = new CompassFragment2();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_PRIVILEGED, Manifest.permission.WAKE_LOCK},99);
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.WAKE_LOCK},99);
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -55,13 +60,10 @@ public class MainActivity extends AppCompatActivity {
         ardutooth = Ardutooth.getInstance(this);
         ardutooth.setConnection();
 
-        //start autopilot thread
-        AutopilotThread autopilotThread = new AutopilotThread();
-        autopilotThread.start();
 
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, compassFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, compassFragment1).commit();
 
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case R.id.menu_compass:{
                         SharedData.mode = SharedData.Mode.COMPASS;
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,compassFragment).commit();
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,compassFragment2).commit();
                         return true;
                     }
                 }

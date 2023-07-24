@@ -1,4 +1,4 @@
-package com.vaslim.autopilot.fragments;
+package com.vaslim.autopilot.fragments.compass;
 
 import android.os.Bundle;
 
@@ -16,17 +16,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vaslim.autopilot.MainActivity;
 import com.vaslim.autopilot.R;
 import com.vaslim.autopilot.SharedData;
 import com.vaslim.autopilot.compass.Compass;
 import com.vaslim.autopilot.compass.SOTWFormatter;
+import com.vaslim.autopilot.ruddercontrol.RudderControlRunnable;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CompassFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CompassFragment extends Fragment {
+
+public abstract class CompassFragmentAbstract extends Fragment {
     private static final String TAG = "CompassFragment";
 
     private Compass compass;
@@ -39,25 +37,8 @@ public class CompassFragment extends Fragment {
 
 
 
-    public CompassFragment() {
+    public CompassFragmentAbstract() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CompassFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CompassFragment newInstance(String param1, String param2) {
-        CompassFragment fragment = new CompassFragment();
-        Bundle args = new Bundle();
-
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -77,12 +58,14 @@ public class CompassFragment extends Fragment {
     public void onPause() {
         super.onPause();
         compass.stop();
+        MainActivity.rudderControlRunnable.shutdown();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         compass.start();
+        MainActivity.rudderControlRunnable.run();
     }
 
     @Override
@@ -93,7 +76,7 @@ public class CompassFragment extends Fragment {
     }
 
     private void setupCompass() {
-        compass = new Compass(CompassFragment.this.getActivity());
+        compass = new Compass(CompassFragmentAbstract.this.getActivity());
         Compass.CompassListener cl = getCompassListener();
         compass.setListener(cl);
     }
@@ -129,7 +112,7 @@ public class CompassFragment extends Fragment {
 
                 // UI updates only in UI thread
                 // https://stackoverflow.com/q/11140285/444966
-                CompassFragment.this.getActivity().runOnUiThread(new Runnable() {
+                CompassFragmentAbstract.this.getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         adjustArrow(azimuth);
@@ -145,9 +128,9 @@ public class CompassFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_compass, container, false);
-        sotwFormatter = new SOTWFormatter(CompassFragment.this.getActivity());
+        sotwFormatter = new SOTWFormatter(CompassFragmentAbstract.this.getActivity());
         arrowView = view.findViewById(R.id.main_image_hands);
-        System.out.println("HELLO: "+CompassFragment.this.getActivity().findViewById(R.id.main_image_hands));
+        System.out.println("HELLO: "+ CompassFragmentAbstract.this.getActivity().findViewById(R.id.main_image_hands));
         sotwLabel = view.findViewById(R.id.sotw_label);
         setupCompass();
         Button buttonApply = view.findViewById(R.id.button_apply_compass);
@@ -159,7 +142,7 @@ public class CompassFragment extends Fragment {
     }
 
     private void updateSensitivity() {
-        EditText editTextSensitivity = CompassFragment.this.getActivity().findViewById(R.id.edit_sensitivity_compass);
+        EditText editTextSensitivity = CompassFragmentAbstract.this.getActivity().findViewById(R.id.edit_sensitivity_compass);
         int value = Integer.parseInt(editTextSensitivity.getText().toString());
         if(value>=1 && value<=10){
             SharedData.sensitivity = value;
@@ -170,15 +153,20 @@ public class CompassFragment extends Fragment {
     }
 
     private void updateTargetBearing() {
-        EditText editTextTargetBearing = CompassFragment.this.getActivity().findViewById(R.id.edit_target_bearing_compass);
+        EditText editTextTargetBearing = CompassFragmentAbstract.this.getActivity().findViewById(R.id.edit_target_bearing_compass);
         double targetBearing = Double.parseDouble(editTextTargetBearing.getText().toString());
         if(targetBearing>=0 && targetBearing <=359){
             SharedData.targetBearing = targetBearing;
+            MainActivity.rudderControlRunnable = chooseThreadAlgorithm();
+            MainActivity.rudderControlRunnable.run();
         }
         else{
             showToast("Target bearing must be 0-359");
         }
     }
+
+    protected abstract RudderControlRunnable chooseThreadAlgorithm();
+
     private void showToast(String message){
         Toast.makeText(this.getActivity(), message, Toast.LENGTH_SHORT).show();
     }
