@@ -21,7 +21,7 @@ import com.vaslim.autopilot.R;
 import com.vaslim.autopilot.SharedData;
 import com.vaslim.autopilot.compass.Compass;
 import com.vaslim.autopilot.compass.SOTWFormatter;
-import com.vaslim.autopilot.ruddercontrol.RudderControlRunnable;
+import com.vaslim.autopilot.ruddercontrol.RudderControlThread;
 
 
 public abstract class CompassFragmentAbstract extends Fragment {
@@ -58,14 +58,18 @@ public abstract class CompassFragmentAbstract extends Fragment {
     public void onPause() {
         super.onPause();
         compass.stop();
-        MainActivity.rudderControlRunnable.shutdown();
+        if(MainActivity.rudderControlRunnable != null){
+            MainActivity.rudderControlRunnable.shutdown();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         compass.start();
-        MainActivity.rudderControlRunnable.run();
+        if(MainActivity.rudderControlRunnable != null){
+            MainActivity.rudderControlRunnable.start();
+        }
     }
 
     @Override
@@ -73,6 +77,9 @@ public abstract class CompassFragmentAbstract extends Fragment {
         super.onStop();
         Log.d(TAG, "stop compass");
         compass.stop();
+        if(MainActivity.rudderControlRunnable != null){
+            MainActivity.rudderControlRunnable.shutdown();
+        }
     }
 
     private void setupCompass() {
@@ -158,14 +165,14 @@ public abstract class CompassFragmentAbstract extends Fragment {
         if(targetBearing>=0 && targetBearing <=359){
             SharedData.targetBearing = targetBearing;
             MainActivity.rudderControlRunnable = chooseThreadAlgorithm();
-            MainActivity.rudderControlRunnable.run();
+            MainActivity.rudderControlRunnable.start();
         }
         else{
             showToast("Target bearing must be 0-359");
         }
     }
 
-    protected abstract RudderControlRunnable chooseThreadAlgorithm();
+    protected abstract RudderControlThread chooseThreadAlgorithm();
 
     private void showToast(String message){
         Toast.makeText(this.getActivity(), message, Toast.LENGTH_SHORT).show();

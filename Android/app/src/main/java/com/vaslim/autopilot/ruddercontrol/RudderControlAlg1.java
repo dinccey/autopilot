@@ -1,11 +1,10 @@
-package com.vaslim.autopilot.ruddercontrol.impl;
+package com.vaslim.autopilot.ruddercontrol;
 
 import com.vaslim.autopilot.MainActivity;
 import com.vaslim.autopilot.SharedData;
 import com.vaslim.autopilot.Turn;
-import com.vaslim.autopilot.ruddercontrol.RudderControlRunnable;
 
-public class RudderControlAlg1 implements RudderControlRunnable, Runnable {
+public class RudderControlAlg1 extends RudderControlThread {
 
     private static final double CYCLE_SLEEP = 100;
 

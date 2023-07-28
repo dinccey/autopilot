@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -20,7 +19,7 @@ import com.vaslim.autopilot.fragments.compass.CompassFragment2;
 import com.vaslim.autopilot.fragments.compass.CompassFragmentAbstract;
 import com.vaslim.autopilot.fragments.ManualFragment;
 import com.vaslim.autopilot.fragments.SettingsFragment;
-import com.vaslim.autopilot.ruddercontrol.RudderControlRunnable;
+import com.vaslim.autopilot.ruddercontrol.RudderControlThread;
 
 import io.github.giuseppebrb.ardutooth.Ardutooth;
 
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted = false;
 
-    public static RudderControlRunnable rudderControlRunnable = null;
+    public static RudderControlThread rudderControlRunnable = null;
     public static Ardutooth ardutooth;
     GPSFragment gpsFragment = new GPSFragment();
     ManualFragment manualFragment = new ManualFragment();
@@ -69,14 +68,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()){
-                    case R.id.menu_autopilot: {
-                        if(ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                            SharedData.mode = SharedData.Mode.GPS;
-                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,gpsFragment).commit();
-                        }else{
-                            Toast.makeText(MainActivity.this, "No location permission", Toast.LENGTH_SHORT).show();
-                        }
-
+                    case R.id.menu_autopilot_2: {
+                        SharedData.mode = SharedData.Mode.COMPASS;
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,compassFragment1).commit();
                         return true;
                     }
                     case R.id.menu_manual: {
@@ -90,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,settingsFragment).commit();
                         return true;
                     }
-                    case R.id.menu_compass:{
+                    case R.id.menu_autopilot_1:{
                         SharedData.mode = SharedData.Mode.COMPASS;
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,compassFragment2).commit();
                         return true;
