@@ -51,7 +51,8 @@ public class RudderControlAlg2 extends RudderControlThread {
             long turnTimeElapsed = 0;
             while(running
                     && (turnInProgress.offsetDegrees > turn.offsetDegrees / 2
-                    || calculateMaxTurnTime() - turnTimeElapsed > 0)
+                    || (calculateMaxTurnTime() - turnTimeElapsed > 0
+                        && turn.direction == turnInProgress.direction))
                     && targetBearing == SharedData.targetBearing)
             {
                 sleepMilliseconds(WAIT_TIME_MILIS);
@@ -67,7 +68,7 @@ public class RudderControlAlg2 extends RudderControlThread {
             long returnTimeElapsed = 0;
             while(running
                     && (turn.direction == turnInProgress.direction
-                            && turnInProgress.offsetDegrees > ACTION_OFFSET_DEGREES
+                            && turnInProgress.offsetDegrees > 0
                             && returnTimeElapsed < turnTimeTotal * MAX_RUDDER_RETURN_PERCENT)
                     && targetBearing == SharedData.targetBearing)
             {

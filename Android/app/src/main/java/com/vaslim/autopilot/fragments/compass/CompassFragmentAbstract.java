@@ -68,7 +68,7 @@ public abstract class CompassFragmentAbstract extends Fragment {
         super.onResume();
         compass.start();
         if(MainActivity.rudderControlRunnable != null){
-            MainActivity.rudderControlRunnable.start();
+            //MainActivity.rudderControlRunnable.start();
         }
     }
 
